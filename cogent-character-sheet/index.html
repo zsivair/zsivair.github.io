@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+        <title>Character Sheet</title>
+        <meta name="theme-color" content="#303767">
+    </head>
+    <body>
+        <div class="container">
+            <h2 class="display-4">Character Sheet</h2>
+            <h4 class="text-muted small">For <a href="https://cogentroleplay.com" target="_blank">Cogent Alpha 1.3</a></h4>
+            <div class="row g-5">
+                <div class="col-md">
+                    <br>
+                    <h2>Character Info</h2>
+                    <input id="character-name" class="form-control form-control-lg" type="text" placeholder="Character" aria-label="Character name input" autocomplete="off">
+                    <div class="row g-0">
+                        <div class="col-3 g-0"><input id="character-age" class="form-control" type="text" placeholder="Age" aria-label="Character age input" autocomplete="off"></div>
+                        <div class="col"><input id="character-race" class="form-control" type="text" placeholder="Race" aria-label="Character race input" autocomplete="off"></div>
+                    </div>
+                    <input id="character-dc" class="form-control" type="text" placeholder="Disabling Characteristics" aria-label="Disabling characteristics input" autocomplete="off">
+                    <br>
+                    <h2>Attributes</h2>
+                    <div id="attributes"></div>
+                    <br>
+                    <h2>Save/Load</h2>
+                    <div class="row">
+                        <div class="col">
+                            <input class="mx-auto form-control form-control-sm" type="file" id="formFile">
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="col btn btn-outline-primary" id="btn-import" onclick="importFile()">Import</button>
+                            <button type="button" class="col btn btn-primary" id="btn-export" onclick="exportFile()">Export</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <br>
+                    <h2>Core Skills</h2>
+                    <div class="accordion" id="skills">
+                    </div>
+                </div>
+                <div class="col-md">
+                    <br>
+                    <div class="row">
+                        <h2 class="col">Vocations</h2>
+                    </div>
+                    
+                    <div id="vocations"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Attributes and Core Skills
+
+            var attributes = {}
+
+            function getAttrById(id) {
+                attrId = id.slice(5,8)
+
+                for(attribute in attributes) {
+                    if(attributes[attribute].id == attrId) {
+                        return attributes[attribute]
+                    }
+                }
+
+            }
+
+            function getSkillAttrById(id) {
+                attrId = id.slice(7,10)
+                for(attribute in attributes) {
+                    if(attributes[attribute].id == attrId) {
+                        attr = attributes[attribute]
+                    }
+                }
+                return attr["skills"][parseInt(id[11])]
+            }
+
+            function onChange(checkElem) {
+
+                var attribute = getAttrById(checkElem.id)
+                if (attribute == null) {
+                    attribute = getSkillAttrById(checkElem.id)
+                }
+
+                function setAttribute(n1,p1,p2,p3,p4) {
+                    document.getElementById(attribute.nega1).checked = n1
+                    document.getElementById(attribute.plus1).checked = p1
+                    document.getElementById(attribute.plus2).checked = p2
+                    document.getElementById(attribute.plus3).checked = p3
+                    document.getElementById(attribute.plus4).checked = p4
+                }
+
+                if(!checkElem.checked) {
+                    cancel = true
+                    if (checkElem.nextSibling.nextSibling.nextSibling.nextSibling != null) {
+                        cancel = !checkElem.nextSibling.nextSibling.nextSibling.nextSibling.checked
+                    }
+                    setAttribute(false,false,false,false,false)
+                    if (cancel) {
+                        updateRolls()
+                        return
+                    }
+                }
+                
+                switch(checkElem.id.slice(-5)) {
+                    case "nega1":
+                        setAttribute(true,false,false,false,false)
+                        break
+                    case "plus1":
+                        setAttribute(false,true,false,false,false)
+                        break
+                    case "plus2":
+                        setAttribute(false,true,true,false,false)
+                        break
+                    case "plus3":
+                        setAttribute(false,true,true,true,false)
+                        break
+                    case "plus4":
+                        setAttribute(false,true,true,true,true)
+                        break
+                }
+
+                updateRolls()
+                
+            }
+
+            function updateRolls() {
+                for (attribute in attributes) {
+                    for (skill in attributes[attribute].skills) {
+                        document.getElementById(`skills-${attributes[attribute].id}-${skill}-roll`).innerHTML = `${3+getTotal(attributes[attribute].id)+getTotal(attributes[attribute].id, skill)}d6`
+                    }
+                }
+            }
+
+            function getAttributeTotal(attributeId) {
+                if (document.getElementById("attr-" + attributeId + "-nega1").checked) {
+                    return -1
+                }
+                else if (document.getElementById("attr-" + attributeId + "-plus4").checked) {
+                    return 4
+                }
+                else if (document.getElementById("attr-" + attributeId + "-plus3").checked) {
+                    return 3
+                }
+                else if (document.getElementById("attr-" + attributeId + "-plus2").checked) {
+                    return 2
+                }
+                else if (document.getElementById("attr-" + attributeId + "-plus1").checked) {
+                    return 1
+                }
+            }
+
+            function getTotal(attributeId, skill=null) {
+                if (skill == null) {
+                    targetId = `attr-${attributeId}-`
+                } else {
+                    targetId = `skills-${attributeId}-${skill}-`
+                }
+                
+                if (document.getElementById(targetId + "nega1").checked) {
+                    return -1
+                }
+                else if (document.getElementById(targetId + "plus4").checked) {
+                    return 4
+                }
+                else if (document.getElementById(targetId + "plus3").checked) {
+                    return 3
+                }
+                else if (document.getElementById(targetId + "plus2").checked) {
+                    return 2
+                }
+                else if (document.getElementById(targetId + "plus1").checked) {
+                    return 1
+                } else {
+                    return 0
+                }
+            }
+
+            function addAttribute(name, id, infoText) {
+                attributes[name.toLowerCase()] = {
+                    id: id,
+                    name: name,
+                    skills: {}
+                }
+
+                document.getElementById("attributes").innerHTML = document.getElementById("attributes").innerHTML + `
+                <div class="row">
+                    <div class="card g-3">
+                        <div class="card-body">
+                            <h5 class="card-title">${name}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">${id.toUpperCase()}</h6>
+                            <!--<p class="card-text text-muted">${infoText}</p>-->
+                            <div class="btn-group" role="group" aria-label="${name} Attribute Points">
+                                <input type="checkbox" class="btn-check" id="attr-${id}-nega1" onchange="onChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-danger" for="attr-${id}-nega1">-1</label>
+                                <input type="checkbox" class="btn-check" id="attr-${id}-plus1" onchange="onChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="attr-${id}-plus1">+1</label>
+                                <input type="checkbox" class="btn-check" id="attr-${id}-plus2" onchange="onChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="attr-${id}-plus2">+2</label>
+                                <input type="checkbox" class="btn-check" id="attr-${id}-plus3" onchange="onChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-dark" for="attr-${id}-plus3">+3</label>
+                                <input type="checkbox" class="btn-check" id="attr-${id}-plus4" onchange="onChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-dark" for="attr-${id}-plus4">+4</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `
+
+                document.getElementById("skills").innerHTML = document.getElementById("skills").innerHTML + `
+                <div class="accordion-item">
+                        <div class="accordion-header" id="skills-${id}-accordion">
+                            <button class="accordion-button collapsed text-muted" type="button" data-bs-toggle="collapse" data-bs-target="#skills-${id}"><strong>${id.toUpperCase()}</strong> Based Skills</h5>
+                        </div>
+                        <div class="accordion-collapse collapse" data-bs-parent="#skills" id="skills-${id}"></div>
+                </div>
+                `
+
+                attributes[name.toLowerCase()] = {
+                    id: id,
+                    name: name,
+                    nega1: "attr-" + id + "-nega1",
+                    plus1: "attr-" + id + "-plus1",
+                    plus2: "attr-" + id + "-plus2",
+                    plus3: "attr-" + id + "-plus3",
+                    plus4: "attr-" + id + "-plus4",
+                    skills: {}
+                }
+            }
+
+            function addSkills(attrName, attrId, skills) {
+                for (skill in skills) {
+                    document.getElementById(`skills-${attrId}`).innerHTML = document.getElementById(`skills-${attrId}`).innerHTML + `
+                    <div class="accordion-body">
+                    <div class="row p-2" id="skills-${attrId}-${skill}">
+                        <div class="col">
+                            <h5 class="card-title float-start">${skills[skill]}<small id="skills-${attrId}-${skill}-roll" class="invisible text-muted">Xd6</small></h5>
+                        </div>
+                        <div class="col-xxl btn-group float-end" role="group" aria-label="${skills[skill]} Skill Points">
+                            <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-nega1" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-danger" for="skills-${attrId}-${skill}-nega1">-1</label>
+                            <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-plus1" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-dark" for="skills-${attrId}-${skill}-plus1">+1</label>
+                            <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-plus2" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-dark" for="skills-${attrId}-${skill}-plus2">+2</label>
+                            <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-plus3" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-dark" for="skills-${attrId}-${skill}-plus3">+3</label>
+                            <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-plus4" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-dark" for="skills-${attrId}-${skill}-plus4">+4</label>
+                        </div>
+                    </div>
+                    </div>
+                    `
+                    attributes[attrName.toLowerCase()].skills[skill] = {
+                        id: skill,
+                        name: skills[skill],
+                        nega1: `skills-${attrId}-${skill}-nega1`,
+                        plus1: `skills-${attrId}-${skill}-plus1`,
+                        plus2: `skills-${attrId}-${skill}-plus2`,
+                        plus3: `skills-${attrId}-${skill}-plus3`,
+                        plus4: `skills-${attrId}-${skill}-plus4`,
+                    }
+                }
+            }
+
+            // Vocations
+            vocations = []
+
+            function addVocation() {
+                id = vocations.length
+
+                newDiv = document.createElement("div")
+                newDiv.className = "card mb-4"
+                newDiv.innerHTML = `
+                    <div class="card-body">
+                        <h6 class="card-subtitle text-muted"><small>VOCATION<strong></strong></small></h6>
+                        <input id="voc-${id}-name" class="form-control mb-2" type="text" placeholder="Vocation Name" onkeyup="onVocationNameChange(this)" aria-label="Vocation input" autocomplete="off">
+                        <div class="row">
+                            <div id="voc-${id}-attr" class="btn-group bn-group-sm"></div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="btn-group">
+                                <input type="checkbox" class="btn-check" id="voc-${id}-attr-plus1" onchange="onVocationAttributeChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-dark" for="voc-${id}-attr-plus1">+1</label>
+                                <input type="checkbox" class="btn-check" id="voc-${id}-attr-plus2" onchange="onVocationAttributeChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-dark" for="voc-${id}-attr-plus2">+2</label>
+                                <input type="checkbox" class="btn-check" id="voc-${id}-attr-plus3" onchange="onVocationAttributeChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-dark" for="voc-${id}-attr-plus3">+3</label>
+                                <input type="checkbox" class="btn-check" id="voc-${id}-attr-plus4" onchange="onVocationAttributeChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-dark" for="voc-${id}-attr-plus4">+4</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <h6 class="col card-subtitle text-muted mt-3"><small>VOCATIONAL SKILLS<strong></strong></small></h6>
+                            <div id="voc-${id}-skills"></div>
+                        </div>
+                    </div>
+                `
+
+                document.getElementById("vocations").appendChild(newDiv)
+
+                for (attribute in attributes) {
+                    document.getElementById(`voc-${id}-attr`).innerHTML = document.getElementById(`voc-${id}-attr`).innerHTML + `
+                        <input type="radio" class="btn-check" name="voc-${id}-attr" id="voc-${id}-attr-${attributes[attribute].id}" onclick="onVocationalAttributeTypeChange(this)" autocomplete="off">
+                        <label class="btn btn-outline-primary btn-sm" for="voc-${id}-attr-${attributes[attribute].id}">${attributes[attribute].id.toUpperCase()}</label>
+                    `
+                }
+
+                vocations[id] = {
+                    id: id,
+                    name: `voc-${id}-name`,
+                    nameEmpty: true,
+                    attribute: null,
+                    plus1: `voc-${id}-attr-plus1`,
+                    plus2: `voc-${id}-attr-plus2`,
+                    plus3: `voc-${id}-attr-plus3`,
+                    plus4: `voc-${id}-attr-plus4`,
+                    skills: []
+                }
+
+                addVocationalSkill(id)
+            }
+
+            function addVocationalSkill(toVocation, invisible=false) {
+                target = vocations[toVocation]
+                targetId = `voc-${toVocation}-skills`
+                id = target.skills.length
+
+                newDiv = document.createElement("div")
+                newDiv.className = invisible? "mb-2 invisible": "mb-2"
+                newDiv.id = `voc-${toVocation}-skills-${id}`
+                newDiv.innerHTML = `
+                    <input id="voc-${toVocation}-skills-${id}-name" class="form-control form-control-sm" type="text" placeholder="Skill Name" aria-label="Vocational skill input" onkeyup="onVocationalSkillNameChange(this)" autocomplete="off">
+                    <div class="row mt-2">
+                        <div id="voc-${toVocation}-skills-${id}-attr" class="btn-group bn-group-sm">
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="btn-group btn-group-sm">
+                            <input type="checkbox" class="btn-check" id="voc-${toVocation}-skills-${id}-plus1" onchange="onVocationalSkillChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-secondary" for="voc-${toVocation}-skills-${id}-plus1">+1</label>
+                            <input type="checkbox" class="btn-check" id="voc-${toVocation}-skills-${id}-plus2" onchange="onVocationalSkillChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-secondary" for="voc-${toVocation}-skills-${id}-plus2">+2</label>
+                            <input type="checkbox" class="btn-check" id="voc-${toVocation}-skills-${id}-plus3" onchange="onVocationalSkillChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-secondary" for="voc-${toVocation}-skills-${id}-plus3">+3</label>
+                            <input type="checkbox" class="btn-check" id="voc-${toVocation}-skills-${id}-plus4" onchange="onVocationalSkillChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-secondary" for="voc-${toVocation}-skills-${id}-plus4">+4</label>
+                        </div>
+                    </div>
+                `
+                document.getElementById(targetId).appendChild(newDiv)
+
+                for(attribute in attributes) {
+                    document.getElementById(`voc-${toVocation}-skills-${id}-attr`).innerHTML = document.getElementById(`voc-${toVocation}-skills-${id}-attr`).innerHTML + `
+                        <input type="radio" class="btn-check" name="voc-${toVocation}-skills-${id}-attr" id="voc-${toVocation}-skills-${id}-attr-${attributes[attribute].id}" onclick="onVocationalSkillAttributeTypeChange(this)" autocomplete="off">
+                        <label class="btn btn-outline-primary btn-sm" for="voc-${toVocation}-skills-${id}-attr-${attributes[attribute].id}">${attributes[attribute].id.toUpperCase()}</label>
+                    `
+                }
+                document.getElementById(`voc-${toVocation}-skills-${id}-attr`).innerHTML = document.getElementById(`voc-${toVocation}-skills-${id}-attr`).innerHTML + `
+                    <input type="radio" class="btn-check" name="voc-${toVocation}-skills-${id}-attr" id="voc-${toVocation}-skills-${id}-attr-cbt" onclick="onVocationalSkillAttributeTypeChange(this)" autocomplete="off">
+                    <label class="btn btn-outline-dark btn-sm" for="voc-${toVocation}-skills-${id}-attr-cbt">CBT</label>
+                `
+
+                target.skills[id] = {
+                    id: id,
+                    name: `voc-${toVocation}-skills-${id}-name`,
+                    nameEmpty: true,
+                    attribute: null,
+                    plus1: `voc-${toVocation}-skills-${id}-plus1`,
+                    plus2: `voc-${toVocation}-skills-${id}-plus2`,
+                    plus3: `voc-${toVocation}-skills-${id}-plus3`,
+                    plus4: `voc-${toVocation}-skills-${id}-plus4`,
+                }
+            }
+
+            function onVocationAttributeChange(checkElem) {
+                var attribute = vocations[parseInt(checkElem.id[4])]
+
+                function setAttribute(p1,p2,p3,p4) {
+                    document.getElementById(attribute.plus1).checked = p1
+                    document.getElementById(attribute.plus2).checked = p2
+                    document.getElementById(attribute.plus3).checked = p3
+                    document.getElementById(attribute.plus4).checked = p4
+                }
+
+                if(!checkElem.checked) {
+                    cancel = true
+                    if (checkElem.nextSibling.nextSibling.nextSibling.nextSibling != null) {
+                        cancel = !checkElem.nextSibling.nextSibling.nextSibling.nextSibling.checked
+                    }
+                    setAttribute(false,false,false,false)
+                    if (cancel) {
+                        updateRolls()
+                        return
+                    }
+                }
+                
+                switch(checkElem.id.slice(-5)) {
+                    case "plus1":
+                        setAttribute(true,false,false,false)
+                        break
+                    case "plus2":
+                        setAttribute(true,true,false,false)
+                        break
+                    case "plus3":
+                        setAttribute(true,true,true,false)
+                        break
+                    case "plus4":
+                        setAttribute(true,true,true,true)
+                        break
+                }
+            }
+
+            function onVocationalAttributeTypeChange(radioElem) {
+                var vocation = vocations[parseInt(radioElem.id.split('-')[1])]
+                vocation.attribute = radioElem.id.slice(-3)
+            }
+
+            function onVocationalSkillAttributeTypeChange(radioElem) {
+                var vocation = vocations[parseInt(radioElem.id.split('-')[1])]
+                var skill = vocation.skills[parseInt(radioElem.id.split('-')[3])]
+                skill.attribute = radioElem.id.slice(-3)
+            }
+
+            function onVocationalSkillChange(checkElem) {
+                var vocation = vocations[parseInt(checkElem.id[4])]
+                var attribute = vocation.skills[parseInt(checkElem.id[13])]
+
+                function setAttribute(p1,p2,p3,p4) {
+                    document.getElementById(attribute.plus1).checked = p1
+                    document.getElementById(attribute.plus2).checked = p2
+                    document.getElementById(attribute.plus3).checked = p3
+                    document.getElementById(attribute.plus4).checked = p4
+                }
+
+                if(!checkElem.checked) {
+                    cancel = true
+                    if (checkElem.nextSibling.nextSibling.nextSibling.nextSibling != null) {
+                        cancel = !checkElem.nextSibling.nextSibling.nextSibling.nextSibling.checked
+                    }
+                    setAttribute(false,false,false,false)
+                    if (cancel) {
+                        updateRolls()
+                        return
+                    }
+                }
+                
+                switch(checkElem.id.slice(-5)) {
+                    case "plus1":
+                        setAttribute(true,false,false,false)
+                        break
+                    case "plus2":
+                        setAttribute(true,true,false,false)
+                        break
+                    case "plus3":
+                        setAttribute(true,true,true,false)
+                        break
+                    case "plus4":
+                        setAttribute(true,true,true,true)
+                        break
+                }
+            }
+
+            function onVocationalSkillNameChange(textElem) {
+                var vocation = vocations[parseInt(textElem.id[4])]
+                var skill = vocation.skills[parseInt(textElem.id[13])]
+                
+                var skillSlots = 5 - textElem.parentNode.parentNode.childNodes.length
+                console.log(skillSlots)
+
+                if(skill.nameEmpty && textElem.value != "") {
+                    addVocationalSkill(vocation.id)
+                    skill.nameEmpty = false
+                } else if (!skill.nameEmpty && textElem.value === "") {
+                    textElem.parentNode.remove()
+                    skill.nameEmpty = true
+                }
+                
+            }
+
+            function onVocationNameChange(textElem) {
+                var vocation = vocations[parseInt(textElem.id[4])]
+
+                if(vocation.nameEmpty && textElem.value != "") {
+                    addVocation()
+                    vocation.nameEmpty = false
+                } else if (!skill.nameEmpty && textElem.value === "") {
+                    textElem.parentNode.parentNode.remove()
+                    skill.nameEmpty = true
+                }
+            }
+
+
+            function getVocationTotal(vocationId, skillId=null) {
+                if (skillId == null) {
+                    targetId = `voc-${vocationId}-attr-`
+                } else {
+                    targetId = `voc-${vocationId}-skills-${skillId}-`
+                }
+
+                console.log(targetId)
+                
+                if (document.getElementById(targetId + "plus4").checked) {
+                    return 4
+                }
+                else if (document.getElementById(targetId + "plus3").checked) {
+                    return 3
+                }
+                else if (document.getElementById(targetId + "plus2").checked) {
+                    return 2
+                }
+                else if (document.getElementById(targetId + "plus1").checked) {
+                    return 1
+                } else {
+                    return 0
+                }
+            }
+
+            // Final Generation
+
+            var template = [
+                {
+                    id: "str",
+                    name: "Strength",
+                    info: "For each additional point in <strong>STR</strong>, <strong>severity in injury</strong> can be <strong>reduced</strong> once every combat encounter.",
+                    skills: [
+                        "Endurance",
+                        "Athletics",
+                        "Grip",
+                        "Swim",
+                        "Throw"
+                    ]
+                },
+                {
+                    id: "ref",
+                    name: "Reflex",
+                    info: "For each additional point in <strong>REF</strong>, <strong>Turn Priority is Higher</strong> at the beginning of combat encounters.",
+                    skills: [
+                        "Perception",
+                        "Acrobatics",
+                        "Ride/Pilot",
+                        "Sleight of Hand",
+                        "Stealth"
+                    ]
+                },
+                {
+                    id: "int",
+                    name: "Intelligence",
+                    info: "For each additional point in <strong>INT</strong>, Receive <strong>3 additional Skill Points</strong> to spend in character creation.",
+                    skills: [
+                        "General Knowledge",
+                        "Deception",
+                        "Infiltration",
+                        "Persuasion",
+                        "Survival"
+                    ]
+                }
+
+            ]
+
+            for (attribute in template) {
+                addAttribute(template[attribute].name, template[attribute].id, template[attribute].info)
+                addSkills(template[attribute].name, template[attribute].id, template[attribute].skills)
+            }
+            updateRolls()
+
+            addVocation()
+
+            var version = "1.0"
+
+            function importFile() {
+
+                function getSkillIdByName(name) {
+                    for (attribute in attributes) {
+                        for (_skill in attributes[attribute].skills) {
+                            if (name === attributes[attribute].skills[_skill].name) {
+                                return _skill
+                            }
+                        }
+                    }
+                }
+
+                var fileNode = document.getElementById("formFile")
+                var file = fileNode.files[0]
+
+                if (file === undefined) {return}
+
+                file.text().then(text => {
+                    var character = JSON.parse(text)
+                    if (character.version != version) {
+                        return
+                    }
+
+                    // Character Info
+                    document.getElementById("character-name").value = character.name
+                    document.getElementById("character-age").value = character.age
+                    document.getElementById("character-race").value = character.race
+                    document.getElementById("character-dc").value = character.disabling
+
+                    // Attributes
+                    for (attribute in attributes) {
+                        var id = attributes[attribute].id
+                        document.getElementById(`attr-${id}-nega1`).checked = false
+                        document.getElementById(`attr-${id}-plus4`).checked = false
+                        document.getElementById(`attr-${id}-plus3`).checked = false
+                        document.getElementById(`attr-${id}-plus2`).checked = false
+                        document.getElementById(`attr-${id}-plus1`).checked = false
+
+                        switch(character[attribute].score) {
+                            case -1:
+                                document.getElementById(`attr-${id}-nega1`).checked = true
+                                break
+                            case 4:
+                                document.getElementById(`attr-${id}-plus4`).checked = true
+                            case 3:
+                                document.getElementById(`attr-${id}-plus3`).checked = true
+                            case 2:
+                                document.getElementById(`attr-${id}-plus2`).checked = true
+                            case 1:
+                                document.getElementById(`attr-${id}-plus1`).checked = true
+                        }
+                        for (skill in character[attribute].skills) {
+                            skillId = getSkillIdByName(skill)
+
+                            document.getElementById(`skills-${id}-${skillId}-nega1`).checked = false
+                            document.getElementById(`skills-${id}-${skillId}-plus4`).checked = false
+                            document.getElementById(`skills-${id}-${skillId}-plus3`).checked = false
+                            document.getElementById(`skills-${id}-${skillId}-plus2`).checked = false
+                            document.getElementById(`skills-${id}-${skillId}-plus1`).checked = false
+
+                            switch(character[attribute].skills[skill]) {
+                                case -1:
+                                    document.getElementById(`skills-${id}-${skillId}-nega1`).checked = true
+                                    break
+                                case 4:
+                                    document.getElementById(`skills-${id}-${skillId}-plus4`).checked = true
+                                case 3:
+                                    document.getElementById(`skills-${id}-${skillId}-plus3`).checked = true
+                                case 2:
+                                    document.getElementById(`skills-${id}-${skillId}-plus2`).checked = true
+                                case 1:
+                                    document.getElementById(`skills-${id}-${skillId}-plus1`).checked = true
+                            }
+                        }
+                    }
+
+                    // Vocations
+                    var vp = document.getElementById("vocations").parentElement
+                    document.getElementById("vocations").remove()
+                    var nD = document.createElement("div")
+                    nD.id = "vocations"
+                    vp.appendChild(nD)
+                    vocations = []
+
+                    for (vocation in character.vocations) {
+                        addVocation()
+                        id = vocations.length - 1
+                        vocations[id].nameEmpty = false
+                        document.getElementById(`voc-${id}-name`).value = vocation
+                        document.getElementById(`voc-${id}-attr-${character.vocations[vocation].attribute}`).checked = true
+
+                        vocations[id].attribute = character.vocations[vocation].attribute
+
+                        document.getElementById(`voc-${id}-attr-plus4`).checked = false
+                        document.getElementById(`voc-${id}-attr-plus3`).checked = false
+                        document.getElementById(`voc-${id}-attr-plus2`).checked = false
+                        document.getElementById(`voc-${id}-attr-plus1`).checked = false
+
+                        switch(character.vocations[vocation].score) {
+                            case 4:
+                                document.getElementById(`voc-${id}-attr-plus4`).checked = true
+                            case 3:
+                                document.getElementById(`voc-${id}-attr-plus3`).checked = true
+                            case 2:
+                                document.getElementById(`voc-${id}-attr-plus2`).checked = true
+                            case 1:
+                                document.getElementById(`voc-${id}-attr-plus1`).checked = true
+                        }
+
+                        for (vSkill in character.vocations[vocation].skills) {
+                            addVocationalSkill(id)
+                            sid = vocations[id].skills.length - 2
+                            vocations[id].skills[sid].nameEmpty = false
+                            
+                            document.getElementById(`voc-${id}-skills-${sid}-name`).value = vSkill
+                            document.getElementById(`voc-${id}-skills-${sid}-attr-${character.vocations[vocation].skills[vSkill].attribute}`).checked = true
+
+                            vocations[id].skills[sid].attribute = character.vocations[vocation].skills[vSkill].attribute
+
+                            document.getElementById(`voc-${id}-skills-${sid}-plus4`).checked = false
+                            document.getElementById(`voc-${id}-skills-${sid}-plus3`).checked = false
+                            document.getElementById(`voc-${id}-skills-${sid}-plus2`).checked = false
+                            document.getElementById(`voc-${id}-skills-${sid}-plus1`).checked = false
+
+                            switch(character.vocations[vocation].skills[vSkill].score) {
+                                case 4:
+                                    document.getElementById(`voc-${id}-skills-${sid}-plus4`).checked = true
+                                case 3:
+                                    document.getElementById(`voc-${id}-skills-${sid}-plus3`).checked = true
+                                case 2:
+                                    document.getElementById(`voc-${id}-skills-${sid}-plus2`).checked = true
+                                case 1:
+                                    document.getElementById(`voc-${id}-skills-${sid}-plus1`).checked = true
+                            }
+
+                        }
+                    }
+
+                    addVocation()
+                    updateRolls()
+                })
+            }
+
+            function exportFile() {
+                function downloadObjectAsJson(exportObj, exportName) {
+                    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+                    var downloadAnchorNode = document.createElement('a');
+                    downloadAnchorNode.setAttribute("href",     dataStr);
+                    downloadAnchorNode.setAttribute("download", exportName + ".json");
+                    document.body.appendChild(downloadAnchorNode); // required for firefox
+                    downloadAnchorNode.click();
+                    downloadAnchorNode.remove();
+                }
+
+                character = {
+                    version: version,
+                    name: document.getElementById("character-name").value,
+                    age: document.getElementById("character-age").value,
+                    race: document.getElementById("character-race").value,
+                    disabling: document.getElementById("character-dc").value,
+                    vocations: {}
+                }
+
+                for (attribute in attributes) {
+                    character[attribute] = {
+                        score: getTotal(attributes[attribute].id),
+                        skills: {}
+                    }
+                    for(skill in attributes[attribute].skills) {
+                        character[attribute].skills[attributes[attribute].skills[skill].name] = getTotal(attributes[attribute].id, skill)
+                    }
+                }
+
+                for (vocation in vocations) {
+                    if (!vocations[vocation].nameEmpty) {
+                        console.log(vocations[vocation].name)
+                        character.vocations[document.getElementById(vocations[vocation].name).value] = {
+                            attribute: vocations[vocation].attribute,
+                            score: getVocationTotal(vocations[vocation].id),
+                            skills: {}
+                        }
+                        for (skill in vocations[vocation].skills) {
+                            if(!vocations[vocation].skills[skill].nameEmpty) {
+                                character.vocations[document.getElementById(vocations[vocation].name).value].skills[document.getElementById(vocations[vocation].skills[skill].name).value] = {score: getVocationTotal(vocations[vocation].id, skill), attribute: vocations[vocation].skills[skill].attribute}
+                            }
+                        }
+                    }
+                }
+                console.log(character)
+                downloadObjectAsJson(character, character.name != ""? character.name : "character")
+            }
+
+        </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+    </body>
+</html>
