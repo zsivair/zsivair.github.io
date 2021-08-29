@@ -1,57 +1,254 @@
+<!--
+The MIT License (MIT)
+
+Copyright (c) 2021 Zsivair
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice and the words 
+'Carrot juice. Carrot juice. Carrot juice.' shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Cogent is copyright Cogent Ropleplay, visit https://cogentroleplay.com/
+Bootstrap 5 is used to style this webpage, visit https://getbootstrap.com/
+
+Please follow me on Twitter (@zsivair). I have no friends.
+
+Carrot juice. Carrot juice. Carrot juice.
+-->
+
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
         <title>Character Sheet</title>
         <meta name="theme-color" content="#303767">
+
+        <style type="text/css">
+            .no-hover:hover, .no-hover:focus {
+                background-color: inherit;
+                color: inherit;
+            }
+        </style>
     </head>
     <body>
-        <div class="container">
+        <div aria-live="polite" aria-atomic="true" class="position-relative" style="z-index: 11;">
+            <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3">
+            </div>
+        </div>
+        <div class="container-xl">
             <h2 class="display-4">Character Sheet</h2>
             <h4 class="text-muted small">For <a href="https://cogentroleplay.com" target="_blank">Cogent Alpha 1.3</a></h4>
             <div class="row g-5">
                 <div class="col-md">
                     <br>
                     <h2>Character Info</h2>
-                    <input id="character-name" class="form-control form-control-lg" type="text" placeholder="Character" aria-label="Character name input" autocomplete="off">
-                    <div class="row g-0">
-                        <div class="col-3 g-0"><input id="character-age" class="form-control" type="text" placeholder="Age" aria-label="Character age input" autocomplete="off"></div>
-                        <div class="col"><input id="character-race" class="form-control" type="text" placeholder="Race" aria-label="Character race input" autocomplete="off"></div>
-                    </div>
-                    <input id="character-dc" class="form-control" type="text" placeholder="Disabling Characteristics" aria-label="Disabling characteristics input" autocomplete="off">
-                    <br>
-                    <h2>Attributes</h2>
-                    <div id="attributes"></div>
-                    <br>
-                    <h2>Save/Load</h2>
-                    <div class="row">
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <input id="character-name" class="form-control form-control-lg" type="text" placeholder="Character" aria-label="Character name input" autocomplete="off">
+                        </div>
+                        <div class="col-3">
+                            <input id="character-age" class="form-control" type="text" placeholder="Age" aria-label="Character age input" autocomplete="off">
+                        </div>
                         <div class="col">
-                            <input class="mx-auto form-control form-control-sm" type="file" id="formFile">
+                            <input id="character-race" class="form-control" type="text" placeholder="Race" aria-label="Character race input" autocomplete="off">
                         </div>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="col btn btn-outline-primary" id="btn-import" onclick="importFile()">Import</button>
-                            <button type="button" class="col btn btn-primary" id="btn-export" onclick="exportFile()">Export</button>
+                        <div class="col-12">
+                            <input id="character-dc" class="form-control" type="text" placeholder="Disabling Characteristics" aria-label="Disabling characteristics input" autocomplete="off">
                         </div>
                     </div>
+                    
+                    <br>
+                    <h2 class="mt-4">Attributes</h2>
+                    <div class="row" id="attributes"></div>
+
+                    <br>
+                    <h5>Roll Options</h5>
+                    <div class="row mx-2">
+                        <div class="col btn-group btn-group-sm">
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-minus-4" onchange="updateRolls()" autocomplete="off">
+                            <label class="btn btn-outline-danger text-nowrap no-hover" for="roll-minus-4">-4</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-minus-3" onchange="updateRolls()" autocomplete="off">
+                            <label class="btn btn-outline-danger text-nowrap no-hover" for="roll-minus-3">-3</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-minus-2" onchange="updateRolls()" autocomplete="off">
+                            <label class="btn btn-outline-danger text-nowrap no-hover" for="roll-minus-2">-2</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-minus-1" onchange="updateRolls()" autocomplete="off">
+                            <label class="btn btn-outline-danger text-nowrap no-hover" for="roll-minus-1">-1</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-mod-0" onchange="updateRolls()" autocomplete="off" checked>
+                            <label class="btn btn-outline-dark text-nowrap no-hover" for="roll-mod-0">0</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-plus-1" onchange="updateRolls()" autocomplete="off">
+                            <label class="btn btn-outline-primary text-nowrap no-hover" for="roll-plus-1">+1</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-plus-2" onchange="updateRolls()" autocomplete="off">
+                            <label class="btn btn-outline-primary text-nowrap no-hover" for="roll-plus-2">+2</label>
+                            <input type="radio" class="btn-check text-nowrap no-hover" name="roll-modifier" id="roll-plus-3" onchange="updateRolls()" autocomplete="off">
+                            <label class="btn btn-outline-primary text-nowrap no-hover" for="roll-plus-3">+3</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-plus-4" onchange="updateRolls()" autocomplete="off">
+                            <label class="btn btn-outline-primary text-nowrap no-hover" for="roll-plus-4">+4</label>
+                        </div>
+                    </div>
+                    
+                    
                 </div>
-                <div class="col-md-5">
+                <div class="col">
+                    
                     <br>
                     <h2>Core Skills</h2>
-                    <div class="accordion" id="skills">
-                    </div>
-                </div>
-                <div class="col-md">
+                    <div class="accordion" id="skills"></div>
                     <br>
                     <div class="row">
                         <h2 class="col">Vocations</h2>
                     </div>
                     
-                    <div id="vocations"></div>
+                    <div id="vocations" class="mb-4"></div>
+                    
+                </div>
+                <div class="col-sm">
+                    <br>
+                    <h2>State</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Destiny<input type="checkbox" class="btn-check" id="roll-adv" onchange="updateRolls()" autocomplete="off">
+                                <label class="col btn btn-outline-warning btn-sm text-nowrap no-hover" id="roll-adv-label" for="roll-adv">ADV</label></h5>
+                            <div class="row">
+                                <div class="col btn-group" role="group" aria-label="Destiny Points">
+                                    <input type="checkbox" class="btn-check" id="destiny-1" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="destiny-1">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="destiny-2" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="destiny-2">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="destiny-3" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="destiny-3">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="destiny-4" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="destiny-4">&nbsp</label>
+                                    <input type="checkbox" class="btn-check " id="destiny-5" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="destiny-5">&nbsp</label>
+                                </div>
+
+                            </div>
+                            <br>
+                            <h5 class="card-title">Commerce</h5>
+                            <div class="row">
+                                <div class="col btn-group" role="group" aria-label="Commerce points">
+                                    <input type="checkbox" class="btn-check" id="commerce-1" onchange="onSimpleChange(this, 8)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-1">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-2" onchange="onSimpleChange(this, 8)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-2">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-3" onchange="onSimpleChange(this, 8)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-3">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-4" onchange="onSimpleChange(this, 8)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-4">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-5" onchange="onSimpleChange(this, 8)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-5">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-6" onchange="onSimpleChange(this, 8)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-6">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-7" onchange="onSimpleChange(this, 8)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-7">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-8" onchange="onSimpleChange(this, 8)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-8">&nbsp</label>
+                                </div>
+                            </div>
+                            <br>
+                            <h5 class="card-title">Armour<input type="button" class="btn-check" id="armour-reset" onclick="resetArmour()" autocomplete="off">
+                                <label class="col btn btn-outline-secondary btn-sm text-nowrap no-hover" id="armour-reset-label" for="armour-reset">RESET</label></h5>
+                            <div class="row">
+                                <div class="col btn-group" role="group" aria-label="Maximum Armour points">
+                                    <input type="checkbox" class="btn-check" id="armour-max-1" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-dark no-hover" for="armour-max-1">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-max-2" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-dark no-hover" for="armour-max-2">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-max-3" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-dark no-hover" for="armour-max-3">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-max-4" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-dark no-hover" for="armour-max-4">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-max-5" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-dark no-hover" for="armour-max-5">&nbsp</label>
+                                </div>
+                            </div>
+                            <div class="row mt-1">
+                                <div class="col btn-group btn-group-sm" role="group" aria-label="Armour points">
+                                    <input type="checkbox" class="btn-check" id="armour-1" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-secondary no-hover" for="armour-1">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-2" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-secondary no-hover" for="armour-2">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-3" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-secondary no-hover" for="armour-3">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-4" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-secondary no-hover" for="armour-4">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-5" onchange="onSimpleChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-secondary no-hover" for="armour-5">&nbsp</label>
+                                </div>
+                            </div>
+                            <br>
+                            <h5 class="card-title">Injuries<input type="checkbox" class="btn-check" id="roll-inj" onchange="updateRolls()" autocomplete="off" checked>
+                                <label class="col btn btn-outline-danger btn-sm text-nowrap no-hover" id="roll-inj-label" for="roll-inj">INJ</label></h5>
+                            <div class="row">
+                                <div class="col btn-group" role="group" aria-label="Injury points">
+                                    <input type="checkbox" class="btn-check" id="injuries-1" onchange="onSimpleChange(this, 6)" autocomplete="off">
+                                    <label class="btn btn-outline-danger no-hover" for="injuries-1">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="injuries-2" onchange="onSimpleChange(this, 6)" autocomplete="off">
+                                    <label class="btn btn-outline-danger no-hover" for="injuries-2">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="injuries-3" onchange="onSimpleChange(this, 6)" autocomplete="off">
+                                    <label class="btn btn-outline-danger no-hover" for="injuries-3">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="injuries-4" onchange="onSimpleChange(this, 6)" autocomplete="off">
+                                    <label class="btn btn-outline-danger no-hover" for="injuries-4">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="injuries-5" onchange="onSimpleChange(this, 6)" autocomplete="off">
+                                    <label class="btn btn-outline-danger no-hover" for="injuries-5">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="injuries-6" onchange="onSimpleChange(this, 6)" autocomplete="off">
+                                    <label class="btn btn-outline-danger no-hover" for="injuries-6">&nbsp</label>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <br>
+                    <h3>Notes</h3>
+                    <div class="row mx-0">
+                        <textarea class="col form-control" id="notes" rows="8"></textarea>
+                    </div>
+                    <br>
+                    <h2>Save/Load</h2>
+                    <div class="row mb-4">
+                        <div class="col">
+                            <input class="mx-auto form-control form-control-sm" type="file" id="formFile">
+                        </div>
+                        <div class="btn-group mb-4" role="group">
+                            <button type="button" class="col btn btn-outline-primary no-hover" id="btn-import" onclick="importFile()">Import</button>
+                            <button type="button" class="col btn btn-primary no-hover" id="btn-export" onclick="exportFile()">Export</button>
+                        </div>
+                    </div>
                 </div>
             </div>
+            
         </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+
         <script>
+
+            // Label access for things like the armouor counter that would be a pain in the rear end for me to id every single one manually
+            var labels = document.getElementsByTagName('LABEL');
+            for (var i = 0; i < labels.length; i++) {
+                if (labels[i].htmlFor != '') {
+                    var elem = document.getElementById(labels[i].htmlFor);
+                    if (elem)
+                        elem.label = labels[i];         
+                }
+            }
             // Attributes and Core Skills
 
             var attributes = {}
@@ -126,13 +323,6 @@
                 
             }
 
-            function updateRolls() {
-                for (attribute in attributes) {
-                    for (skill in attributes[attribute].skills) {
-                        document.getElementById(`skills-${attributes[attribute].id}-${skill}-roll`).innerHTML = `${3+getTotal(attributes[attribute].id)+getTotal(attributes[attribute].id, skill)}d6`
-                    }
-                }
-            }
 
             function getAttributeTotal(attributeId) {
                 if (document.getElementById("attr-" + attributeId + "-nega1").checked) {
@@ -186,24 +376,24 @@
                 }
 
                 document.getElementById("attributes").innerHTML = document.getElementById("attributes").innerHTML + `
-                <div class="row">
-                    <div class="card g-3">
+                <div class="row mx-0">
+                    <div class="card mb-2">
                         <div class="card-body">
-                            <h5 class="card-title">${name}</h5>
+                            <h5 class="card-title">${name}<button id="attr-${id}-roll" role="button" class="btn btn-link fw-normal text-decoration-none text-muted p-0" onclick="rollOnClick(this)"><small>Xd6</small></button></h5>
                             <h6 class="card-subtitle mb-2 text-muted">${id.toUpperCase()}</h6>
-                            <!--<p class="card-text text-muted">${infoText}</p>-->
+                            <!----<p class="card-text text-muted">${infoText}</p>-->
                             <div class="btn-group" role="group" aria-label="${name} Attribute Points">
-                                <input type="checkbox" class="btn-check" id="attr-${id}-nega1" onchange="onChange(this)" autocomplete="off">
-                                <label class="btn btn-outline-danger" for="attr-${id}-nega1">-1</label>
-                                <input type="checkbox" class="btn-check" id="attr-${id}-plus1" onchange="onChange(this)" autocomplete="off">
-                                <label class="btn btn-outline-primary" for="attr-${id}-plus1">+1</label>
-                                <input type="checkbox" class="btn-check" id="attr-${id}-plus2" onchange="onChange(this)" autocomplete="off">
-                                <label class="btn btn-outline-primary" for="attr-${id}-plus2">+2</label>
-                                <input type="checkbox" class="btn-check" id="attr-${id}-plus3" onchange="onChange(this)" autocomplete="off">
-                                <label class="btn btn-outline-dark" for="attr-${id}-plus3">+3</label>
-                                <input type="checkbox" class="btn-check" id="attr-${id}-plus4" onchange="onChange(this)" autocomplete="off">
-                                <label class="btn btn-outline-dark" for="attr-${id}-plus4">+4</label>
-                            </div>
+                            <input type="checkbox" class="btn-check" id="attr-${id}-nega1" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-danger no-hover" for="attr-${id}-nega1">-1</label>
+                            <input type="checkbox" class="btn-check" id="attr-${id}-plus1" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-primary no-hover" for="attr-${id}-plus1">+1</label>
+                            <input type="checkbox" class="btn-check" id="attr-${id}-plus2" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-primary no-hover" for="attr-${id}-plus2">+2</label>
+                            <input type="checkbox" class="btn-check" id="attr-${id}-plus3" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-dark no-hover" for="attr-${id}-plus3">+3</label>
+                            <input type="checkbox" class="btn-check" id="attr-${id}-plus4" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-dark no-hover" for="attr-${id}-plus4">+4</label>
+                            
                         </div>
                     </div>
                 </div>
@@ -212,7 +402,7 @@
                 document.getElementById("skills").innerHTML = document.getElementById("skills").innerHTML + `
                 <div class="accordion-item">
                         <div class="accordion-header" id="skills-${id}-accordion">
-                            <button class="accordion-button collapsed text-muted" type="button" data-bs-toggle="collapse" data-bs-target="#skills-${id}"><strong>${id.toUpperCase()}</strong> Based Skills</h5>
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#skills-${id}">${name} Based Skills</h5>
                         </div>
                         <div class="accordion-collapse collapse" data-bs-parent="#skills" id="skills-${id}"></div>
                 </div>
@@ -236,19 +426,19 @@
                     <div class="accordion-body">
                     <div class="row p-2" id="skills-${attrId}-${skill}">
                         <div class="col">
-                            <h5 class="card-title float-start">${skills[skill]}<small id="skills-${attrId}-${skill}-roll" class="invisible text-muted">Xd6</small></h5>
+                            <h5 class="card-title float-start">${skills[skill]}<button id="skills-${attrId}-${skill}-roll" role="button" class="btn btn-link fw-normal text-decoration-none text-muted p-0" onclick="rollOnClick(this)"><small>Xd6</small></button></h5>
                         </div>
-                        <div class="col-xxl btn-group float-end" role="group" aria-label="${skills[skill]} Skill Points">
+                        <div class="btn-group float-end" role="group" aria-label="${skills[skill]} Skill Points">
                             <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-nega1" onchange="onChange(this)" autocomplete="off">
-                            <label class="btn btn-outline-danger" for="skills-${attrId}-${skill}-nega1">-1</label>
+                            <label class="btn btn-outline-danger no-hover" for="skills-${attrId}-${skill}-nega1">-1</label>
                             <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-plus1" onchange="onChange(this)" autocomplete="off">
-                            <label class="btn btn-outline-dark" for="skills-${attrId}-${skill}-plus1">+1</label>
+                            <label class="btn btn-outline-dark no-hover" for="skills-${attrId}-${skill}-plus1">+1</label>
                             <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-plus2" onchange="onChange(this)" autocomplete="off">
-                            <label class="btn btn-outline-dark" for="skills-${attrId}-${skill}-plus2">+2</label>
+                            <label class="btn btn-outline-dark no-hover" for="skills-${attrId}-${skill}-plus2">+2</label>
                             <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-plus3" onchange="onChange(this)" autocomplete="off">
-                            <label class="btn btn-outline-dark" for="skills-${attrId}-${skill}-plus3">+3</label>
+                            <label class="btn btn-outline-dark no-hover" for="skills-${attrId}-${skill}-plus3">+3</label>
                             <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-plus4" onchange="onChange(this)" autocomplete="off">
-                            <label class="btn btn-outline-dark" for="skills-${attrId}-${skill}-plus4">+4</label>
+                            <label class="btn btn-outline-dark no-hover" for="skills-${attrId}-${skill}-plus4">+4</label>
                         </div>
                     </div>
                     </div>
@@ -275,21 +465,25 @@
                 newDiv.className = "card mb-4"
                 newDiv.innerHTML = `
                     <div class="card-body">
+                        
+
                         <h6 class="card-subtitle text-muted"><small>VOCATION<strong></strong></small></h6>
-                        <input id="voc-${id}-name" class="form-control mb-2" type="text" placeholder="Vocation Name" onkeyup="onVocationNameChange(this)" aria-label="Vocation input" autocomplete="off">
+                        <div class="input-group" id="voc-${id}-roll-container">
+                            <input id="voc-${id}-name" class="form-control mb-2" type="text" placeholder="Vocation Name" onkeyup="onVocationNameChange(this)" aria-label="Vocation input" autocomplete="off">
+                        </div>
                         <div class="row">
                             <div id="voc-${id}-attr" class="btn-group bn-group-sm"></div>
                         </div>
                         <div class="row mt-2">
                             <div class="btn-group">
                                 <input type="checkbox" class="btn-check" id="voc-${id}-attr-plus1" onchange="onVocationAttributeChange(this)" autocomplete="off">
-                                <label class="btn btn-outline-dark" for="voc-${id}-attr-plus1">+1</label>
+                                <label class="btn btn-outline-dark no-hover" for="voc-${id}-attr-plus1">+1</label>
                                 <input type="checkbox" class="btn-check" id="voc-${id}-attr-plus2" onchange="onVocationAttributeChange(this)" autocomplete="off">
-                                <label class="btn btn-outline-dark" for="voc-${id}-attr-plus2">+2</label>
+                                <label class="btn btn-outline-dark no-hover" for="voc-${id}-attr-plus2">+2</label>
                                 <input type="checkbox" class="btn-check" id="voc-${id}-attr-plus3" onchange="onVocationAttributeChange(this)" autocomplete="off">
-                                <label class="btn btn-outline-dark" for="voc-${id}-attr-plus3">+3</label>
+                                <label class="btn btn-outline-dark no-hover" for="voc-${id}-attr-plus3">+3</label>
                                 <input type="checkbox" class="btn-check" id="voc-${id}-attr-plus4" onchange="onVocationAttributeChange(this)" autocomplete="off">
-                                <label class="btn btn-outline-dark" for="voc-${id}-attr-plus4">+4</label>
+                                <label class="btn btn-outline-dark no-hover" for="voc-${id}-attr-plus4">+4</label>
                             </div>
                         </div>
                         <div class="row">
@@ -304,7 +498,7 @@
                 for (attribute in attributes) {
                     document.getElementById(`voc-${id}-attr`).innerHTML = document.getElementById(`voc-${id}-attr`).innerHTML + `
                         <input type="radio" class="btn-check" name="voc-${id}-attr" id="voc-${id}-attr-${attributes[attribute].id}" onclick="onVocationalAttributeTypeChange(this)" autocomplete="off">
-                        <label class="btn btn-outline-primary btn-sm" for="voc-${id}-attr-${attributes[attribute].id}">${attributes[attribute].id.toUpperCase()}</label>
+                        <label class="btn btn-outline-primary btn-sm no-hover" for="voc-${id}-attr-${attributes[attribute].id}">${attributes[attribute].id.toUpperCase()}</label>
                     `
                 }
 
@@ -332,7 +526,10 @@
                 newDiv.className = invisible? "mb-2 invisible": "mb-2"
                 newDiv.id = `voc-${toVocation}-skills-${id}`
                 newDiv.innerHTML = `
-                    <input id="voc-${toVocation}-skills-${id}-name" class="form-control form-control-sm" type="text" placeholder="Skill Name" aria-label="Vocational skill input" onkeyup="onVocationalSkillNameChange(this)" autocomplete="off">
+                    <div id="voc-${toVocation}-skills-${id}-roll-container" class="input-group">
+                        <input id="voc-${toVocation}-skills-${id}-name" class="form-control form-control-sm" type="text" placeholder="Skill Name" aria-label="Vocational skill input" onkeyup="onVocationalSkillNameChange(this)" autocomplete="off">
+                        </div>
+                    </div>
                     <div class="row mt-2">
                         <div id="voc-${toVocation}-skills-${id}-attr" class="btn-group bn-group-sm">
                         </div>
@@ -340,13 +537,13 @@
                     <div class="row mt-2">
                         <div class="btn-group btn-group-sm">
                             <input type="checkbox" class="btn-check" id="voc-${toVocation}-skills-${id}-plus1" onchange="onVocationalSkillChange(this)" autocomplete="off">
-                            <label class="btn btn-outline-secondary" for="voc-${toVocation}-skills-${id}-plus1">+1</label>
+                            <label class="btn btn-outline-secondary no-hover" for="voc-${toVocation}-skills-${id}-plus1">+1</label>
                             <input type="checkbox" class="btn-check" id="voc-${toVocation}-skills-${id}-plus2" onchange="onVocationalSkillChange(this)" autocomplete="off">
-                            <label class="btn btn-outline-secondary" for="voc-${toVocation}-skills-${id}-plus2">+2</label>
+                            <label class="btn btn-outline-secondary no-hover" for="voc-${toVocation}-skills-${id}-plus2">+2</label>
                             <input type="checkbox" class="btn-check" id="voc-${toVocation}-skills-${id}-plus3" onchange="onVocationalSkillChange(this)" autocomplete="off">
-                            <label class="btn btn-outline-secondary" for="voc-${toVocation}-skills-${id}-plus3">+3</label>
+                            <label class="btn btn-outline-secondary no-hover" for="voc-${toVocation}-skills-${id}-plus3">+3</label>
                             <input type="checkbox" class="btn-check" id="voc-${toVocation}-skills-${id}-plus4" onchange="onVocationalSkillChange(this)" autocomplete="off">
-                            <label class="btn btn-outline-secondary" for="voc-${toVocation}-skills-${id}-plus4">+4</label>
+                            <label class="btn btn-outline-secondary no-hover" for="voc-${toVocation}-skills-${id}-plus4">+4</label>
                         </div>
                     </div>
                 `
@@ -355,12 +552,12 @@
                 for(attribute in attributes) {
                     document.getElementById(`voc-${toVocation}-skills-${id}-attr`).innerHTML = document.getElementById(`voc-${toVocation}-skills-${id}-attr`).innerHTML + `
                         <input type="radio" class="btn-check" name="voc-${toVocation}-skills-${id}-attr" id="voc-${toVocation}-skills-${id}-attr-${attributes[attribute].id}" onclick="onVocationalSkillAttributeTypeChange(this)" autocomplete="off">
-                        <label class="btn btn-outline-primary btn-sm" for="voc-${toVocation}-skills-${id}-attr-${attributes[attribute].id}">${attributes[attribute].id.toUpperCase()}</label>
+                        <label class="btn btn-outline-primary btn-sm no-hover" for="voc-${toVocation}-skills-${id}-attr-${attributes[attribute].id}">${attributes[attribute].id.toUpperCase()}</label>
                     `
                 }
                 document.getElementById(`voc-${toVocation}-skills-${id}-attr`).innerHTML = document.getElementById(`voc-${toVocation}-skills-${id}-attr`).innerHTML + `
                     <input type="radio" class="btn-check" name="voc-${toVocation}-skills-${id}-attr" id="voc-${toVocation}-skills-${id}-attr-cbt" onclick="onVocationalSkillAttributeTypeChange(this)" autocomplete="off">
-                    <label class="btn btn-outline-dark btn-sm" for="voc-${toVocation}-skills-${id}-attr-cbt">CBT</label>
+                    <label class="btn btn-outline-dark btn-sm no-hover" for="voc-${toVocation}-skills-${id}-attr-cbt">CBT</label>
                 `
 
                 target.skills[id] = {
@@ -411,17 +608,21 @@
                         setAttribute(true,true,true,true)
                         break
                 }
+
+                updateRolls()
             }
 
             function onVocationalAttributeTypeChange(radioElem) {
                 var vocation = vocations[parseInt(radioElem.id.split('-')[1])]
                 vocation.attribute = radioElem.id.slice(-3)
+                updateRolls()
             }
 
             function onVocationalSkillAttributeTypeChange(radioElem) {
                 var vocation = vocations[parseInt(radioElem.id.split('-')[1])]
                 var skill = vocation.skills[parseInt(radioElem.id.split('-')[3])]
                 skill.attribute = radioElem.id.slice(-3)
+                updateRolls()
             }
 
             function onVocationalSkillChange(checkElem) {
@@ -461,6 +662,8 @@
                         setAttribute(true,true,true,true)
                         break
                 }
+
+                updateRolls()
             }
 
             function onVocationalSkillNameChange(textElem) {
@@ -468,7 +671,6 @@
                 var skill = vocation.skills[parseInt(textElem.id[13])]
                 
                 var skillSlots = 5 - textElem.parentNode.parentNode.childNodes.length
-                console.log(skillSlots)
 
                 if(skill.nameEmpty && textElem.value != "") {
                     addVocationalSkill(vocation.id)
@@ -477,6 +679,8 @@
                     textElem.parentNode.remove()
                     skill.nameEmpty = true
                 }
+
+                updateRolls()
                 
             }
 
@@ -487,9 +691,11 @@
                     addVocation()
                     vocation.nameEmpty = false
                 } else if (!skill.nameEmpty && textElem.value === "") {
-                    textElem.parentNode.parentNode.remove()
+                    textElem.parentNode.parentNode.parentNode.remove()
                     skill.nameEmpty = true
                 }
+
+                updateRolls()
             }
 
 
@@ -499,8 +705,6 @@
                 } else {
                     targetId = `voc-${vocationId}-skills-${skillId}-`
                 }
-
-                console.log(targetId)
                 
                 if (document.getElementById(targetId + "plus4").checked) {
                     return 4
@@ -518,7 +722,330 @@
                 }
             }
 
-            // Final Generation
+            // Simple State Handlers
+
+            function onSimpleChange(elem, max) {
+
+                var count = parseInt(elem.id.split("-").slice(-1))
+                var prefix = elem.id.split("-").slice(0,elem.id.split("-").length - 1).join("-")
+
+                if(document.getElementById(`${prefix}-${count}`).checked) {
+                    for (var i = 1; i <= max; i++) document.getElementById(`${prefix}-${i}`).checked = i <= count
+                } else {
+                    if(count+1 <= max) {
+                        if (document.getElementById(`${prefix}-${count+1}`).checked) {
+                            for (var i = 1; i <= max; i++) document.getElementById(`${prefix}-${i}`).checked = i <= count
+                        } else {
+                            for (var i = 1; i <= max; i++) document.getElementById(`${prefix}-${i}`).checked = i <= count - 1
+                        }
+                    } else {
+                        for (var i = 1; i <= max; i++) document.getElementById(`${prefix}-${i}`).checked = i <= count - 1
+                    }
+                }
+
+                if (elem.id.split("-")[1] === "max") {
+                    function getElementMax() {
+                        count = 0
+                        for (var i = 1; i <= 5; i++) {
+                            if (document.getElementById(`${prefix}-${i}`).checked) count += 1
+                        }
+                        return count
+                    }
+
+                    var subPrefix = elem.id.split("-").slice(0,elem.id.split("-").length - 2).join("-")
+                    for (var i = 1; i <= max; i++) {
+                        if (i <= getElementMax()) {
+                            document.getElementById(`${subPrefix}-${i}`).label.classList.remove("disabled")
+                        } else {
+                            document.getElementById(`${subPrefix}-${i}`).label.classList.add("disabled")
+                        }
+                        document.getElementById(`${subPrefix}-${i}`).checked = i <= getElementMax()
+                    }
+                }
+
+                updateRolls()
+            }
+
+            function getDestiny() {
+                count = 0
+                for (var i = 1; i <= 5; i++) {
+                    if (document.getElementById(`destiny-${i}`).checked) count += 1
+                }
+                return count
+            }
+
+            function getCommerce() {
+                count = 0
+                for (var i = 1; i <= 8; i++) {
+                    if (document.getElementById(`commerce-${i}`).checked) count += 1
+                }
+                return count
+            }
+
+            function getInjuries() {
+                count = 0
+                for (var i = 1; i <= 6; i++) {
+                    if (document.getElementById(`injuries-${i}`).checked) count += 1
+                }
+                return count
+            }
+
+            function getArmour() {
+                count = 0
+                for (var i = 1; i <= 5; i++) {
+                    if (document.getElementById(`armour-${i}`).checked) count += 1
+                }
+                return count
+            }
+
+            function getMaxArmour() {
+                count = 0
+                for (var i = 1; i <= 5; i++) {
+                    if (document.getElementById(`armour-max-${i}`).checked) count += 1
+                }
+                return count
+            }
+
+            // Rolling
+
+            function getModifier() {
+                var totalMod = 0
+                for (i = 1; i <= 4; i++) {
+                    if (document.getElementById(`roll-minus-${i}`).checked) totalMod -= i
+                }
+                for (i = 1; i <= 4; i++) {
+                    if (document.getElementById(`roll-plus-${i}`).checked) totalMod += i
+                }
+                return totalMod
+            }
+
+            function resetArmour() {
+                for(var i = 1; i <= 5; i++) document.getElementById(`armour-${i}`).checked = i <= getMaxArmour()
+                updateRolls()
+            }
+
+            var rollTable = {}
+
+            function updateRolls() {
+
+                function allAttributeTotal() {
+                    var total = 0
+                    for (attributeId in attributes) {
+                        total += getTotal(attributes[attributeId].id)
+                    }
+                    return total
+                }
+
+                if(getDestiny() == 0) {
+                    document.getElementById("roll-adv-label").classList.add("disabled")
+                    document.getElementById("roll-adv").checked = false
+                } else {
+                    document.getElementById("roll-adv-label").classList.remove("disabled")
+                }
+
+                if(getArmour() == getMaxArmour()) {
+                    document.getElementById("armour-reset").label.classList.add("disabled")
+                } else {
+                    document.getElementById("armour-reset").label.classList.remove("disabled")
+                }
+
+                // Update attributes and skills
+                for (attribute in attributes) {
+                    var attrRoll = 3+getTotal(attributes[attribute].id)+getModifier()-(document.getElementById("roll-inj").checked? getInjuries(): 0)
+                    attrRoll = attrRoll >= 0? attrRoll: 0
+                    document.getElementById(`attr-${attributes[attribute].id}-roll`).innerHTML = `${attrRoll}d6`
+                    rollTable[attributes[attribute].id] = {roll: attrRoll, name: attributes[attribute].name, type:"normal", skills: {}}
+
+                    for (skill in attributes[attribute].skills) {
+                        var skillRoll = 3+getTotal(attributes[attribute].id)+getTotal(attributes[attribute].id, skill)+getModifier()-(document.getElementById("roll-inj").checked? getInjuries(): 0)
+                        skillRoll = skillRoll >= 0? skillRoll: 0
+                        document.getElementById(`skills-${attributes[attribute].id}-${skill}-roll`).innerHTML = `${skillRoll}d6`
+                        rollTable[attributes[attribute].id].skills[attributes[attribute].skills[skill].id] = {name: `${attributes[attribute].id}: ${attributes[attribute].skills[skill].name}`, type:"normal", roll: skillRoll}
+                    }
+                }
+
+                // Update vocations and vocational skills
+                rollTable.vocations = {}
+
+                for (vocationId in vocations) {
+                    var vocation = vocations[vocationId]
+                    if (!vocation.nameEmpty && vocation.attribute != null) {
+                        var vocRoll = 3+getTotal(vocation.attribute)+getVocationTotal(vocationId)+getModifier()-(document.getElementById("roll-inj").checked? getInjuries(): 0)
+                        vocRoll = vocRoll >= 0? vocRoll: 0
+
+                        document.getElementById(`voc-${vocationId}-roll-container`).childNodes[2].remove()
+
+                        var button = document.createElement("button")
+                        button.className = "btn btn-outline-secondary mb-2 no-hover"
+                        button.setAttribute("type", "button")
+                        button.setAttribute("onclick", "rollOnClick(this)")
+                        button.id = `voc-${vocationId}-roll`
+                        button.innerHTML = `${vocRoll}d6`
+
+                        document.getElementById(`voc-${vocationId}-roll-container`).appendChild(button)
+
+                        rollTable.vocations[vocationId] = {roll: vocRoll, name: document.getElementById(vocation.name).value, type: "voc", skills: {}}
+
+                        for (skillId in vocation.skills) {
+                            var skill = vocation.skills[skillId]
+                            if (!skill.nameEmpty && skill.attribute != null) {
+                                var attTotal = skill.attribute == "cbt"? allAttributeTotal(): getTotal(skill.attribute)
+
+                                // Work out armour penalty
+                                var armourDeficit = getMaxArmour() - 1 < 0? 0: getMaxArmour() - 1
+                                var enduranceBenefit = getTotal("str", 0) < 0? 0: getTotal("str", 0)
+                                var armourPenalty = armourDeficit - enduranceBenefit
+                                armourPenalty = armourPenalty < 0? 0: armourPenalty
+                                armourPenalty = skill.attribute == "cbt"? armourPenalty: 0
+
+                                console.log(armourPenalty)
+
+                                var skillRoll = 3+attTotal+getVocationTotal(vocationId, skillId)+getModifier()-(document.getElementById("roll-inj").checked? getInjuries(): 0)-armourPenalty
+                                skillRoll = skillRoll >= 0? skillRoll: 0
+
+                                document.getElementById(`voc-${vocationId}-skills-${skillId}-roll-container`).childNodes[2].remove()
+
+                                var button = document.createElement("button")
+                                button.className = "btn btn-outline-secondary btn-sm no-hover"
+                                button.setAttribute("type", "button")
+                                button.setAttribute("onclick", "rollOnClick(this)")
+                                button.id = `voc-${vocationId}-skills-${skillId}-roll`
+                                button.innerHTML = `${skillRoll}d6`
+
+                                document.getElementById(`voc-${vocationId}-skills-${skillId}-roll-container`).appendChild(button)
+
+                                rollTable.vocations[vocationId].skills[skillId] = {roll: skillRoll, type: skill.attribute == "cbt"? "cbt": "voc", name: document.getElementById(skill.name).value}
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            function createToast(title, rolls, type="normal", adv=false) {
+
+                function winsOf(someRolls, advantage=false) {
+                    wins = 0
+                    for (roll in someRolls) {
+                        if (someRolls[roll] >= (advantage? 3: 4)) {
+                            wins++
+                        }
+                    }
+                    return wins
+                }
+
+                var toast = document.createElement("div")
+                toast.setAttribute("data-bs-delay", "10000")
+                toast.setAttribute("role", "alert")
+                toast.setAttribute("aria-live", "assertive")
+                toast.setAttribute("aria-atomic", "true")
+                
+                var toastHeader = document.createElement("div")
+                var toastStyle = "bg-light"
+                var headerStyle = ""
+                var buttonStyle = ""
+
+                switch(type) {
+                    case "cbt":
+                        headerStyle = "bg-dark text-light"
+                        toastStyle = "bg-dark text-light"
+                        buttonStyle = "bg-light"
+                        break
+                    case "voc":
+                        headerStyle = "bg-primary text-light"
+                        buttonStyle = "bg-light"
+                        break
+                    case "normal":
+                        headerStyle = "bg-light"
+                        break
+                }
+
+                if (winsOf(rolls,adv) == 0) {
+                    toastStyle = "bg-danger text-light"
+                }
+                if (adv) {
+                    headerStyle = "bg-warning text-dark"
+                    buttonStyle = "bg-light"
+                }
+
+                toast.className = `toast ${toastStyle} border-0`
+                toastHeader.className = `toast-header ${headerStyle}`
+                
+                var toastHeaderText = document.createElement("strong")
+                toastHeaderText.className = "me-auto"
+                toastHeaderText.innerText = `${title.toUpperCase()} ${adv? "(ADV)": ""}`
+
+                toastHeader.appendChild(toastHeaderText)
+
+                var toastHeaderButton = document.createElement("button")
+                toastHeaderButton.setAttribute("type", "button")
+                toastHeaderButton.setAttribute("data-bs-dismiss", "toast")
+                toastHeaderButton.setAttribute("aria-label", "Close")
+                toastHeaderButton.className = `btn-close ${buttonStyle}`
+
+                toastHeader.appendChild(toastHeaderButton)
+
+                toast.appendChild(toastHeader)
+                
+                var toastBody = document.createElement("div")
+                toastBody.className = "toast-body"
+
+                var toastBodyTitle = document.createElement("h5")
+                toastBodyTitle.innerText = `You rolled ${winsOf(rolls, adv)} win${winsOf(rolls, adv) == 1? "": "s"}`
+
+                toastBody.appendChild(toastBodyTitle)
+
+                var toastBodySubtitle = document.createElement("h6")
+                toastBodySubtitle.className = "fw-lighter"
+                toastBodySubtitle.innerText = `(${rolls.length}d6) Roll: ${rolls.join(", ")}`
+
+                toastBody.appendChild(toastBodySubtitle)
+
+                toast.appendChild(toastBody)
+
+                document.getElementById("toast-container").appendChild(toast)
+
+                var bsToast = new bootstrap.Toast(toast)
+                bsToast.show()
+
+            }
+
+            function rollOnClick(elem) {
+                var withAdvantage = document.getElementById("roll-adv").checked
+
+                if (withAdvantage) for (var i = 1; i <= 5; i++) document.getElementById(`destiny-${i}`).checked = getDestiny() - 1 >= 1? i <= getDestiny() - 1: false
+                if (withAdvantage) document.getElementById("roll-adv").checked = false
+
+                document.getElementById("roll-mod-0").checked = true
+
+                switch(elem.id.split("-")[0]) {
+                    case "attr": 
+                        rollDice(rollTable[elem.id.split("-")[1]], withAdvantage)
+                        break
+                    case "skills":
+                        rollDice(rollTable[elem.id.split("-")[1]].skills[elem.id.split("-")[2]], withAdvantage)
+                        break
+                    case "voc":
+                        if (elem.id.split("-")[2] == "skills") {
+                            rollDice(rollTable.vocations[elem.id.split("-")[1]].skills[elem.id.split("-")[3]], withAdvantage)
+                        } else {
+                            rollDice(rollTable.vocations[elem.id.split("-")[1]], withAdvantage)
+                        }
+                        break
+                }
+            }
+
+            function rollDice(obj, adv) {
+                var values = []
+
+                for (var i = 0; i < obj.roll; i++) {
+                    values[i] = Math.floor((Math.random() * 6) + 1)
+                }
+
+                createToast(obj.name, values, obj.type, adv)
+            }
+
+            // The Next Generation
 
             var template = [
                 {
@@ -568,7 +1095,9 @@
 
             addVocation()
 
-            var version = "1.0"
+            // IMPORT AND EXPORT
+
+            var version = "1.1"
 
             function importFile() {
 
@@ -708,6 +1237,23 @@
                         }
                     }
 
+                    // State
+                    for (var i = 1; i <= 5; i++) document.getElementById(`destiny-${i}`).checked = i <= character.state.destiny
+                    for (var i = 1; i <= 8; i++) document.getElementById(`commerce-${i}`).checked = i <= character.state.commerce
+                    for (var i = 1; i <= 6; i++) document.getElementById(`injuries-${i}`).checked = i <= character.state.injuries
+                    for (var i = 1; i <= 5; i++) document.getElementById(`armour-${i}`).checked = i <= character.state.armour
+                    for (var i = 1; i <= 5; i++) document.getElementById(`armour-max-${i}`).checked = i <= character.state.armourMax
+
+                    for (var i = 1; i <= 5; i++) {
+                        if (i <= getMaxArmour()) {
+                            document.getElementById(`armour-${i}`).label.classList.remove("disabled")
+                        } else {
+                            document.getElementById(`armour-${i}`).label.classList.add("disabled")
+                        }
+                    }
+
+                    document.getElementById("notes").value = character.state.notes
+
                     addVocation()
                     updateRolls()
                 })
@@ -730,7 +1276,15 @@
                     age: document.getElementById("character-age").value,
                     race: document.getElementById("character-race").value,
                     disabling: document.getElementById("character-dc").value,
-                    vocations: {}
+                    vocations: {},
+                    state: {
+                        notes: document.getElementById("notes").value,
+                        destiny: getDestiny(),
+                        commerce: getCommerce(),
+                        injuries: getInjuries(),
+                        armour: getArmour(),
+                        armourMax: getMaxArmour()
+                    }
                 }
 
                 for (attribute in attributes) {
@@ -745,7 +1299,6 @@
 
                 for (vocation in vocations) {
                     if (!vocations[vocation].nameEmpty) {
-                        console.log(vocations[vocation].name)
                         character.vocations[document.getElementById(vocations[vocation].name).value] = {
                             attribute: vocations[vocation].attribute,
                             score: getVocationTotal(vocations[vocation].id),
@@ -758,12 +1311,10 @@
                         }
                     }
                 }
-                console.log(character)
                 downloadObjectAsJson(character, character.name != ""? character.name : "character")
             }
 
         </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
     </body>
 </html>
