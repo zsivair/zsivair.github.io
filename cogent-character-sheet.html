@@ -1,0 +1,1652 @@
+---
+permalink: /cogent-character-sheet
+---
+<!--
+The MIT License (MIT)
+
+Copyright (c) 2021 Zsivair
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice and the words 
+'Carrot juice. Carrot juice. Carrot juice.' shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Cogent is copyright Cogent Ropleplay, visit https://cogentroleplay.com/
+Bootstrap 5 is used to style this webpage, visit https://getbootstrap.com/
+
+Please follow me on Twitter (@zsivair). I have no friends.
+
+Carrot juice. Carrot juice. Carrot juice.
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+        <title>Character Sheet</title>
+        <meta name="theme-color" content="#303767">
+
+        <style type="text/css">
+            .no-hover:hover, .no-hover:focus {
+                background-color: inherit;
+                color: inherit;
+            }
+
+            .force-bg {
+                background-color: inherit !important;
+            }
+        </style>
+    </head>
+    <body>
+        <div aria-live="polite" aria-atomic="true" class="position-relative" style="z-index: 11;">
+            <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3">
+            </div>
+        </div>
+        <div class="offcanvas offcanvas-start" id="customiser">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title">Customise</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body" style="overflow-y: scroll;">
+                <h6 class="text-muted"><small>CAMPAIGN PLAY PRESETS</small></h6>
+                <div class="row">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-secondary" onclick="(()=> {
+                            character.settings.limits.attributePoints = 1
+                            character.settings.limits.skillPoints = 6
+                            character.settings.limits.vocationCount = 1
+                            character.settings.limits.maxSkillPoints = 2
+                            character.settings.limits.maxVocationPoints = 2
+                            render()
+                        })()">Initiate Tier</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="(()=> {
+                            character.settings.limits.attributePoints = 2
+                            character.settings.limits.skillPoints = 12
+                            character.settings.limits.vocationCount = 2
+                            character.settings.limits.maxSkillPoints = 3
+                            character.settings.limits.maxVocationPoints = 3
+                            render()
+                        })()">Adept Tier</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="(()=> {
+                            character.settings.limits.attributePoints = 2
+                            character.settings.limits.skillPoints = 18
+                            character.settings.limits.vocationCount = 3
+                            character.settings.limits.maxSkillPoints = 4
+                            character.settings.limits.maxVocationPoints = 4
+                            render()
+                        })()">Veteran Tier</button>
+                    </div>
+                </div>
+                <br>
+                <h6 class="text-muted"><small>CHARACTER CREATION SETTINGS</small></h6>
+                <div class="row mb-1">
+                    <div class="col">
+                        <label for="input-attr-points">Attribute Points</label>
+                    </div>
+                    <div class="col-3">
+                        <input class="form-control form-control-sm" type="number" id="input-attr-points" min="1" onchange="((e) => {character.settings.limits.attributePoints = this.value; render()})(this)">
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col">
+                        <label for="input-skill-points">Skill Points</label>
+                    </div>
+                    <div class="col-3">
+                        <input class="form-control form-control-sm" type="number" id="input-skill-points" min="1" onchange="((e) => {character.settings.limits.skillPoints = this.value; render()})(this)">
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col">
+                        <label for="input-voc-count"># of Vocations</label>
+                    </div>
+                    <div class="col-3">
+                        <input class="form-control form-control-sm" type="number" id="input-voc-count" min="1" max="3" onchange="((e) => {character.settings.limits.vocationCount = this.value; render()})(this)">
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col">
+                        <label for="input-voc-count">Max Core Skill Points</label>
+                    </div>
+                    <div class="col-3">
+                        <input class="form-control form-control-sm" type="number" id="input-max-skill-points" min="1" max="4" onchange="((e) => {character.settings.limits.maxSkillPoints = this.value; render()})(this)">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label for="input-voc-count">Max Vocation Skill Points</label>
+                    </div>
+                    <div class="col-3">
+                        <input class="form-control form-control-sm" type="number" id="input-max-voc-points" min="1" max="4" onchange="((e) => {character.settings.limits.maxVocationPoints = this.value; render()})(this)">
+                    </div>
+                </div>
+                <br>
+                <h6 class="text-muted"><small>WEAPON MODIFIERS</small></h6>
+                <div id="custom-weapon-modifiers">
+                    <div class="card" id="weapon-ID-ID">
+                        <div class="card-body">
+                            <h5 class="card-title text-muted"><small>UNARMED</small></h5>
+                            <div class="row">
+                                <div class="row mb-1">
+                                    <div class="col">
+                                        Melee
+                                    </div>
+                                    <div class="col-3">
+                                        <input class="form-control" type="number" id="weapon-ID-ID-melee" value="0">
+                                    </div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col">
+                                        Ranged
+                                    </div>
+                                    <div class="col-3">
+                                        <input class="form-control" type="number" id="weapon-ID-ID-ranged" value="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-xl">
+            <h2 class="display-4">Character Sheet</h2>
+            <h4 class="text-muted small">For <a href="https://cogentroleplay.com" target="_blank">Cogent Alpha 1.3</a></h4>
+            <div class="row g-5">
+                <div class="col-md">
+                    <br>
+                    <h2>Character Info</h2>
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <input id="character-name" class="form-control form-control-lg" type="text" placeholder="Character" aria-label="Character name input" autocomplete="off">
+                        </div>
+                        <div class="col-3">
+                            <input id="character-age" class="form-control" type="text" placeholder="Age" aria-label="Character age input" autocomplete="off">
+                        </div>
+                        <div class="col">
+                            <input id="character-race" class="form-control" type="text" placeholder="Race" aria-label="Character race input" autocomplete="off">
+                        </div>
+                        <div class="col-12">
+                            <input id="character-dc" class="form-control" type="text" placeholder="Disabling Characteristics" aria-label="Disabling characteristics input" autocomplete="off">
+                        </div>
+                    </div>
+                    <br>
+                    <button class="btn btn-link fw-normal text-decoration-none text-dark accordion-button force-bg p-0" type="button" data-bs-toggle="collapse" data-bs-target="#summaryCollapse"><h4>Summary</h4></button>
+                    <div class="card collapse show" id="summaryCollapse">
+                        <div class="card-body">
+                            <div class="mx-auto">
+                                <div class="row">
+                                    <div class="col-8"><h5 class="card-title text-center fw-normal">Attribute Points</div>
+                                    <div class="col ms-auto"><h5 class="card-title fw-bold text-center""><span id="sum-attr-points">2</span><small class="fw-lighter text-muted">/<span id="limit-attr-points">2</span></small></h5></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-8"><h5 class="card-title text-center fw-normal">Skill Points</div>
+                                    <div class="col ms-auto"><h5 class="card-title fw-bold text-center"><span id="sum-skill-points">5</span><small class="fw-lighter text-muted">/<span id="limit-skill-points">12</span></small></h5></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-8"><h5 class="card-title text-center fw-normal"># of Vocations</div>
+                                    <div class="col ms-auto"><h5 class="card-title fw-bold text-center"><span id="sum-voc-count">1</span><small class="fw-lighter text-muted">/<span id="limit-voc-count">2</span></small></h5></div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-8"><h5 class="card-title text-center fw-normal">Max Core Skill Points</div>
+                                    <div class="col ms-auto"><h5 class="card-title fw-bold text-center"><span id="sum-max-skill-points">2</span><small class="fw-lighter text-muted">/<span id="limit-max-skill-points">4</span></small></h5></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-8"><h5 class="card-title text-center fw-normal">Max Vocation Skill Points</div>
+                                    <div class="col ms-auto"><h5 class="card-title fw-bold text-center"><span id="sum-max-voc-points">3</span><small class="fw-lighter text-muted">/<span id="limit-max-voc-points">4</span></small></h5></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-primary" onclick="(()=> {
+                                        character.settings.limits.attributePoints = 2
+                                        character.settings.limits.skillPoints = 12
+                                        character.settings.limits.vocationCount = 3
+                                        character.settings.limits.maxSkillPoints = 4
+                                        character.settings.limits.maxVocationPoints = 4
+                                        render()
+                                    })()">Fast Play</button>
+                                    <button class="btn btn-outline-secondary" data-bs-toggle="offcanvas" data-bs-target="#customiser">Customise</button>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <h2 class="mt-4">Attributes</h2>
+                    <div class="row" id="attributes"></div>
+
+                    <br>
+                    <h5>Roll Options</h5>
+                    <div class="row mx-2 mb-4">
+                        <div class="col btn-group btn-group-sm">
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-minus-4" onchange="render()" autocomplete="off">
+                            <label class="btn btn-outline-danger text-nowrap no-hover" for="roll-minus-4">-4</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-minus-3" onchange="render()" autocomplete="off">
+                            <label class="btn btn-outline-danger text-nowrap no-hover" for="roll-minus-3">-3</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-minus-2" onchange="render()" autocomplete="off">
+                            <label class="btn btn-outline-danger text-nowrap no-hover" for="roll-minus-2">-2</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-minus-1" onchange="render()" autocomplete="off">
+                            <label class="btn btn-outline-danger text-nowrap no-hover" for="roll-minus-1">-1</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-mod-0" onchange="render()" autocomplete="off" checked>
+                            <label class="btn btn-outline-dark text-nowrap no-hover" for="roll-mod-0">0</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-plus-1" onchange="render()" autocomplete="off">
+                            <label class="btn btn-outline-primary text-nowrap no-hover" for="roll-plus-1">+1</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-plus-2" onchange="render()" autocomplete="off">
+                            <label class="btn btn-outline-primary text-nowrap no-hover" for="roll-plus-2">+2</label>
+                            <input type="radio" class="btn-check text-nowrap no-hover" name="roll-modifier" id="roll-plus-3" onchange="render()" autocomplete="off">
+                            <label class="btn btn-outline-primary text-nowrap no-hover" for="roll-plus-3">+3</label>
+                            <input type="radio" class="btn-check" name="roll-modifier" id="roll-plus-4" onchange="render()" autocomplete="off">
+                            <label class="btn btn-outline-primary text-nowrap no-hover" for="roll-plus-4">+4</label>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+                <div class="col">
+                    
+                    <br>
+                    <h2>Core Skills</h2>
+                    <div class="accordion" id="skills"></div>
+                    <br>
+                    <div class="row">
+                        <h2 class="col">Vocations</h2>
+                    </div>
+                    
+                    <div id="vocations" class="mb-4"></div>
+                    
+                </div>
+                <div class="col-sm">
+                    <br>
+                    <h2>State</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Destiny<input type="checkbox" class="btn-check" id="roll-adv" onchange="render()" autocomplete="off">
+                                <label class="col btn btn-outline-warning btn-sm text-nowrap no-hover" id="roll-adv-label" for="roll-adv">ADV</label></h5>
+                            <div class="row">
+                                <div class="col btn-group" role="group" aria-label="Destiny Points">
+                                    <input type="checkbox" class="btn-check" id="destiny-1" onchange="onChange(this, 5, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="destiny-1">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="destiny-2" onchange="onChange(this, 5, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="destiny-2">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="destiny-3" onchange="onChange(this, 5, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="destiny-3">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="destiny-4" onchange="onChange(this, 5, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="destiny-4">&nbsp</label>
+                                    <input type="checkbox" class="btn-check " id="destiny-5" onchange="onChange(this, 5, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="destiny-5">&nbsp</label>
+                                </div>
+
+                            </div>
+                            <br>
+                            <h5 class="card-title">Commerce</h5>
+                            <div class="row">
+                                <div class="col btn-group" role="group" aria-label="Commerce points">
+                                    <input type="checkbox" class="btn-check" id="commerce-1" onchange="onChange(this, 8, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-1">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-2" onchange="onChange(this, 8, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-2">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-3" onchange="onChange(this, 8, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-3">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-4" onchange="onChange(this, 8, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-4">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-5" onchange="onChange(this, 8, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-5">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-6" onchange="onChange(this, 8, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-6">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-7" onchange="onChange(this, 8, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-7">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="commerce-8" onchange="onChange(this, 8, true)" autocomplete="off">
+                                    <label class="btn btn-outline-warning no-hover" for="commerce-8">&nbsp</label>
+                                </div>
+                            </div>
+                            <br>
+                            <h5 class="card-title">Armour<input type="button" class="btn-check" id="armour-reset" onclick="character.state['armour'] = character.state['armour-max']; render()" autocomplete="off">
+                                <label class="col btn btn-outline-secondary btn-sm text-nowrap no-hover" id="armour-reset-label" for="armour-reset">RESET</label></h5>
+                            <div class="row">
+                                <div class="col btn-group" role="group" aria-label="Maximum Armour points">
+                                    <input type="checkbox" class="btn-check" id="armour-max-1" onchange="onChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-dark no-hover" for="armour-max-1">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-max-2" onchange="onChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-dark no-hover" for="armour-max-2">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-max-3" onchange="onChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-dark no-hover" for="armour-max-3">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-max-4" onchange="onChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-dark no-hover" for="armour-max-4">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-max-5" onchange="onChange(this, 5)" autocomplete="off">
+                                    <label class="btn btn-outline-dark no-hover" for="armour-max-5">&nbsp</label>
+                                </div>
+                            </div>
+                            <div class="row mt-1">
+                                <div class="col btn-group btn-group-sm" role="group" aria-label="Armour points">
+                                    <input type="checkbox" class="btn-check" id="armour-1" onchange="onChange(this, 5, true)" autocomplete="off">
+                                    <label class="btn btn-outline-secondary no-hover" for="armour-1">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-2" onchange="onChange(this, 5, true)" autocomplete="off">
+                                    <label class="btn btn-outline-secondary no-hover" for="armour-2">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-3" onchange="onChange(this, 5, true)" autocomplete="off">
+                                    <label class="btn btn-outline-secondary no-hover" for="armour-3">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-4" onchange="onChange(this, 5, true)" autocomplete="off">
+                                    <label class="btn btn-outline-secondary no-hover" for="armour-4">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="armour-5" onchange="onChange(this, 5, true)" autocomplete="off">
+                                    <label class="btn btn-outline-secondary no-hover" for="armour-5">&nbsp</label>
+                                </div>
+                            </div>
+                            <br>
+                            <h5 class="card-title">Injuries<input type="checkbox" class="btn-check" id="roll-inj" onchange="render()" autocomplete="off" checked>
+                                <label class="col btn btn-outline-danger btn-sm text-nowrap no-hover" id="roll-inj-label" for="roll-inj">INJ</label></h5>
+                            <div class="row">
+                                <div class="col btn-group" role="group" aria-label="Injury points">
+                                    <input type="checkbox" class="btn-check" id="injuries-1" onchange="onChange(this, 6, true)" autocomplete="off">
+                                    <label class="btn btn-outline-danger no-hover" for="injuries-1">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="injuries-2" onchange="onChange(this, 6, true)" autocomplete="off">
+                                    <label class="btn btn-outline-danger no-hover" for="injuries-2">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="injuries-3" onchange="onChange(this, 6, true)" autocomplete="off">
+                                    <label class="btn btn-outline-danger no-hover" for="injuries-3">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="injuries-4" onchange="onChange(this, 6, true)" autocomplete="off">
+                                    <label class="btn btn-outline-danger no-hover" for="injuries-4">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="injuries-5" onchange="onChange(this, 6, true)" autocomplete="off">
+                                    <label class="btn btn-outline-danger no-hover" for="injuries-5">&nbsp</label>
+                                    <input type="checkbox" class="btn-check" id="injuries-6" onchange="onChange(this, 6, true)" autocomplete="off">
+                                    <label class="btn btn-outline-danger no-hover" for="injuries-6">&nbsp</label>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <br>
+                    <h3>Notes</h3>
+                    <div class="row mx-0">
+                        <textarea class="col form-control" id="notes" rows="8"></textarea>
+                    </div>
+                    <br>
+                    <h2>Save/Load</h2>
+                    <div class="row mb-4">
+                        <div class="col">
+                            <input class="mx-auto form-control form-control-sm" type="file" id="formFile">
+                        </div>
+                        <div class="btn-group mb-4" role="group">
+                            <button type="button" class="col btn btn-outline-primary no-hover" id="btn-import" onclick="importFile()">Import</button>
+                            <button type="button" class="col btn btn-primary no-hover" id="btn-export" onclick="exportFile()">Export</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+
+        <script>
+
+            // Label access for things like the armouor counter that would be a pain in the rear end for me to id every single one manually
+            function updateLabels() {
+                var labels = document.getElementsByTagName('LABEL');
+                for (var i = 0; i < labels.length; i++) {
+                    if (labels[i].htmlFor != '') {
+                        var elem = document.getElementById(labels[i].htmlFor);
+                        if (elem)
+                            elem.label = labels[i];         
+                    }
+                }
+            }
+
+            var uiLookup = {
+                addValue: (value) => {
+                    function genID() {
+                        return String.fromCharCode(65 + Math.floor(Math.random() * 26)) + String.fromCharCode(65 + Math.floor(Math.random() * 26)) + Date.now()
+                    }
+                    var id = genID()
+                    uiLookup[id] = value
+                    return (id, value)
+                }
+            }
+
+            var counterLookup = {
+                destiny: 5,
+                commerce: 8,
+                armour: 5,
+                injuries: 6
+            }
+
+            
+            // Attributes and Core Skills
+
+            var attributes = {}
+
+            function onChange(elem, max=null, pointsBased=false) {
+
+                var current = parseInt(elem.id.split("-").slice(-1))
+                if (elem.id.split("-").slice(-2)[0] == "nega") current = -current
+
+                switch(elem.id.split("-")[0]) {
+                    case "attr":
+
+                        if (!elem.checked && current == character.attributes[elem.id.split("-")[1]].score) {
+                            current = 0
+                        }
+
+                        character.attributes[elem.id.split("-")[1]].score = current
+                        break
+                    case "skills":
+
+                        if (!elem.checked && current == character.attributes[elem.id.split("-")[1]].skills[elem.id.split("-")[2]].score) {
+                            current = 0
+                        }
+
+                        character.attributes[elem.id.split("-")[1]].skills[elem.id.split("-")[2]].score = current
+                        break
+                    case "voc":
+                        var vocId = elem.id.split("-")[1]
+                        if (elem.id.split("-")[2] == "attr") {
+                            if (!elem.checked && current == character.vocations[vocId].score) {
+                                current = 0
+                            }
+
+                            character.vocations[vocId].score = current
+                        } else {
+                            var skillId = elem.id.split("-")[3]
+                            if (!elem.checked && current == character.vocations[vocId].skills[skillId].score) {
+                                current = 0
+                            }
+
+                            character.vocations[vocId].skills[skillId].score = current
+                        }
+                        break
+                    default:
+                        var current = parseInt(elem.id.split("-").slice(-1))
+                        var prefix = elem.id.split("-").slice(0,elem.id.split("-").length - 1).join("-")
+
+                        if (current == character.state[prefix]) {
+                            if(pointsBased) {
+                                current--
+                            } else {
+                                current = 0
+                            }
+                        }
+
+                        character.state[prefix] = current
+                        if (prefix.split("-").slice(-1) == "max") {
+                            character.state[prefix.split("-")[0]] = current
+                        }
+
+                        break
+                }
+
+                render()
+            }
+
+            function addAttribute(name, id, infoText) {
+
+                document.getElementById("attributes").innerHTML = document.getElementById("attributes").innerHTML + `
+                <div class="row mx-0">
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <h5 class="card-title">${name}<button id="attr-${id}-roll" role="button" class="btn btn-link fw-normal text-decoration-none text-muted p-0" onclick="rollOnClick(this)"><small>Xd6</small></button></h5>
+                            <h6 class="card-subtitle mb-2 text-muted">${id.toUpperCase()}</h6>
+                            <!----<p class="card-text text-muted">${infoText}</p>-->
+                            <div class="btn-group" role="group" aria-label="${name} Attribute Points">
+                            <input type="checkbox" class="btn-check" id="attr-${id}-nega-1" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-danger no-hover" for="attr-${id}-nega-1">-1</label>
+                            <input type="checkbox" class="btn-check" id="attr-${id}-plus-1" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-primary no-hover" for="attr-${id}-plus-1">+1</label>
+                            <input type="checkbox" class="btn-check" id="attr-${id}-plus-2" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-primary no-hover" for="attr-${id}-plus-2">+2</label>
+                            <input type="checkbox" class="btn-check" id="attr-${id}-plus-3" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-dark no-hover" for="attr-${id}-plus-3">+3</label>
+                            <input type="checkbox" class="btn-check" id="attr-${id}-plus-4" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-dark no-hover" for="attr-${id}-plus-4">+4</label>
+                            
+                        </div>
+                    </div>
+                </div>
+                `
+
+                document.getElementById("skills").innerHTML = document.getElementById("skills").innerHTML + `
+                <div class="accordion-item">
+                        <div class="accordion-header" id="skills-${id}-accordion">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#skills-${id}">${name} Based Skills</h5>
+                        </div>
+                        <div class="accordion-collapse collapse" data-bs-parent="#skills" id="skills-${id}"></div>
+                </div>
+                `
+            }
+
+            function addSkills(attrName, attrId, skills) {
+                for (skill in skills) {
+                    document.getElementById(`skills-${attrId}`).innerHTML = document.getElementById(`skills-${attrId}`).innerHTML + `
+                    <div class="accordion-body">
+                    <div class="row p-2" id="skills-${attrId}-${skill}">
+                        <div class="col">
+                            <h5 class="card-title float-start">${skills[skill]}<button id="skills-${attrId}-${skill}-roll" role="button" class="btn btn-link fw-normal text-decoration-none text-muted p-0" onclick="rollOnClick(this)"><small>Xd6</small></button></h5>
+                        </div>
+                        <div class="btn-group float-end" role="group" aria-label="${skills[skill]} Skill Points">
+                            <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-nega-1" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-danger no-hover" for="skills-${attrId}-${skill}-nega-1">-1</label>
+                            <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-plus-1" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-dark no-hover" for="skills-${attrId}-${skill}-plus-1">+1</label>
+                            <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-plus-2" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-dark no-hover" for="skills-${attrId}-${skill}-plus-2">+2</label>
+                            <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-plus-3" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-dark no-hover" for="skills-${attrId}-${skill}-plus-3">+3</label>
+                            <input type="checkbox" class="btn-check" id="skills-${attrId}-${skill}-plus-4" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-dark no-hover" for="skills-${attrId}-${skill}-plus-4">+4</label>
+                        </div>
+                    </div>
+                    </div>
+                    `
+                }
+            }
+
+            function addVocation(withId=null, withSkill=true) {
+                var id
+                if (withId == null) {
+                    id = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + String.fromCharCode(65 + Math.floor(Math.random() * 26)) + String.fromCharCode(65 + Math.floor(Math.random() * 26)) +String.fromCharCode(65 + Math.floor(Math.random() * 26)) + Date.now()
+                } else {
+                    id = withId
+                }
+
+                newDiv = document.createElement("div")
+                newDiv.className = "card mb-4"
+                newDiv.id = `voc-${id}`
+                newDiv.innerHTML = `
+                    <div class="card-body">
+                        
+
+                        <h6 class="card-subtitle text-muted"><small>VOCATION<strong></strong></small></h6>
+                        <div class="input-group" id="voc-${id}-roll-container">
+                            <input id="voc-${id}-name" class="form-control mb-2" type="text" placeholder="Vocation Name" onkeyup="onVocationNameChange(this)" aria-label="Vocation input" autocomplete="off">
+                        </div>
+                        <div class="row">
+                            <div id="voc-${id}-attr" class="btn-group bn-group-sm"></div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="btn-group">
+                                <input type="checkbox" class="btn-check" id="voc-${id}-attr-plus-1" onchange="onChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-dark no-hover" for="voc-${id}-attr-plus-1">+1</label>
+                                <input type="checkbox" class="btn-check" id="voc-${id}-attr-plus-2" onchange="onChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-dark no-hover" for="voc-${id}-attr-plus-2">+2</label>
+                                <input type="checkbox" class="btn-check" id="voc-${id}-attr-plus-3" onchange="onChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-dark no-hover" for="voc-${id}-attr-plus-3">+3</label>
+                                <input type="checkbox" class="btn-check" id="voc-${id}-attr-plus-4" onchange="onChange(this)" autocomplete="off">
+                                <label class="btn btn-outline-dark no-hover" for="voc-${id}-attr-plus-4">+4</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <h6 class="col card-subtitle text-muted mt-3"><small>VOCATIONAL SKILLS<strong></strong></small></h6>
+                            <div id="voc-${id}-skills"></div>
+                        </div>
+                    </div>
+                `
+
+                document.getElementById("vocations").appendChild(newDiv)
+
+                for (attrId in character.attributes) {
+                    document.getElementById(`voc-${id}-attr`).innerHTML = document.getElementById(`voc-${id}-attr`).innerHTML + `
+                        <input type="radio" class="btn-check" name="voc-${id}-attr" id="voc-${id}-attr-${attrId}" onclick="(() => {character.vocations['${id}'].attribute = '${attrId}'; render()})()" autocomplete="off">
+                        <label class="btn btn-outline-primary btn-sm no-hover" for="voc-${id}-attr-${attrId}">${attrId.toUpperCase()}</label>
+                    `
+                }
+
+                character.vocations[id] = {
+                    nameEmpty: true,
+                    score: 0,
+                    attribute: null,
+                    skills: {}
+                }
+
+                if (withSkill){
+                    var skillId = addVocationalSkill(id)
+                }
+
+                return id
+            }
+
+            function addVocationalSkill(toVocation, withId=null, invisible=false) {
+                target = character.vocations[toVocation]
+                targetId = `voc-${toVocation}-skills`
+                var id
+                if(withId == null) {
+                    id = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + String.fromCharCode(65 + Math.floor(Math.random() * 26)) + String.fromCharCode(65 + Math.floor(Math.random() * 26)) +String.fromCharCode(65 + Math.floor(Math.random() * 26)) + Date.now()
+                } else {
+                    id = withId
+                }
+                
+
+                newDiv = document.createElement("div")
+                newDiv.className = invisible? "mb-2 invisible": "mb-2"
+                newDiv.id = `voc-${toVocation}-skills-${id}`
+                newDiv.innerHTML = `
+                    <div id="voc-${toVocation}-skills-${id}-roll-container" class="input-group">
+                        <input id="voc-${toVocation}-skills-${id}-name" class="form-control form-control-sm" type="text" placeholder="Skill Name" aria-label="Vocational skill input" onkeyup="onVocationalSkillNameChange(this)" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div id="voc-${toVocation}-skills-${id}-attr" class="btn-group bn-group-sm">
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="btn-group btn-group-sm">
+                            <input type="checkbox" class="btn-check" id="voc-${toVocation}-skills-${id}-plus-1" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-secondary no-hover" for="voc-${toVocation}-skills-${id}-plus-1">+1</label>
+                            <input type="checkbox" class="btn-check" id="voc-${toVocation}-skills-${id}-plus-2" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-secondary no-hover" for="voc-${toVocation}-skills-${id}-plus-2">+2</label>
+                            <input type="checkbox" class="btn-check" id="voc-${toVocation}-skills-${id}-plus-3" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-secondary no-hover" for="voc-${toVocation}-skills-${id}-plus-3">+3</label>
+                            <input type="checkbox" class="btn-check" id="voc-${toVocation}-skills-${id}-plus-4" onchange="onChange(this)" autocomplete="off">
+                            <label class="btn btn-outline-secondary no-hover" for="voc-${toVocation}-skills-${id}-plus-4">+4</label>
+                        </div>
+                    </div>
+                `
+                document.getElementById(targetId).appendChild(newDiv)
+
+                for(attrId in character.attributes) {
+                    document.getElementById(`voc-${toVocation}-skills-${id}-attr`).innerHTML = document.getElementById(`voc-${toVocation}-skills-${id}-attr`).innerHTML + `
+                        <input type="radio" class="btn-check" name="voc-${toVocation}-skills-${id}-attr" id="voc-${toVocation}-skills-${id}-attr-${attrId}" onclick="(() => {character.vocations['${toVocation}'].skills['${id}'].attribute = '${attrId}'; render()})()" autocomplete="off">
+                        <label class="btn btn-outline-primary btn-sm no-hover" for="voc-${toVocation}-skills-${id}-attr-${attrId}">${attrId.toUpperCase()}</label>
+                    `
+                }
+                document.getElementById(`voc-${toVocation}-skills-${id}-attr`).innerHTML = document.getElementById(`voc-${toVocation}-skills-${id}-attr`).innerHTML + `
+                    <input type="radio" class="btn-check" name="voc-${toVocation}-skills-${id}-attr" id="voc-${toVocation}-skills-${id}-attr-cbt" onclick="(() => {character.vocations['${toVocation}'].skills['${id}'].attribute = 'cbt'; render()})()" autocomplete="off">
+                    <label class="btn btn-outline-dark btn-sm no-hover" for="voc-${toVocation}-skills-${id}-attr-cbt">CBT</label>
+                `
+
+                target.skills[id] = {
+                    nameEmpty: true,
+                    attribute: null,
+                    score: 0
+                }
+
+                return id
+            }
+
+            function onVocationalSkillNameChange(textElem) {
+                var vocation = character.vocations[textElem.id.split("-")[1]]
+                var skill = vocation.skills[textElem.id.split("-")[3]]
+                
+                var count = 0
+                for (s in vocation.skills) if (!vocation.skills[s].nameEmpty) count++
+
+                if(skill.nameEmpty && textElem.value != "") {
+                    if (count < 3) addVocationalSkill(textElem.id.split("-")[1])
+                    skill.nameEmpty = false
+                } else if (!skill.nameEmpty && textElem.value === "") {
+                    delete vocation.skills[textElem.id.split("-")[3]]
+                    textElem.parentNode.parentNode.remove()
+
+                    if (count >= 4) addVocationalSkill(textElem.id.split("-")[1])
+                }
+
+                render()
+            }
+
+            function onVocationNameChange(textElem) {
+                var vocation = character.vocations[textElem.id.split("-")[1]]
+
+                var count = 0
+                for (v in character.vocations) if (!character.vocations[v].nameEmpty) count++
+
+                if(vocation.nameEmpty && textElem.value != "") {
+                    if (count < 2) addVocation()
+                    vocation.nameEmpty = false
+                } else if (!skill.nameEmpty && textElem.value === "") {
+                    delete character.vocations[textElem.id.split("-")[1]]
+                    textElem.parentNode.parentNode.parentNode.remove()
+                    if (count >= 3) addVocation()
+                }
+
+                render()
+            }
+
+            // Rolling
+
+            function getModifier() {
+                var totalMod = 0
+                for (i = 1; i <= 4; i++) {
+                    if (document.getElementById(`roll-minus-${i}`).checked) totalMod -= i
+                }
+                for (i = 1; i <= 4; i++) {
+                    if (document.getElementById(`roll-plus-${i}`).checked) totalMod += i
+                }
+                return totalMod
+            }
+
+            function resetArmour() {
+                for(var i = 1; i <= 5; i++) document.getElementById(`armour-${i}`).checked = i <= getMaxArmour()
+                updateRolls()
+            }
+
+            function createToast(title, rolls, type="normal", adv=false) {
+
+                function winsOf(someRolls, advantage=false) {
+                    wins = 0
+                    for (roll in someRolls) {
+                        if (someRolls[roll] >= (advantage? 3: 4)) {
+                            wins++
+                        }
+                    }
+                    return wins
+                }
+
+                var toast = document.createElement("div")
+                toast.setAttribute("data-bs-delay", "10000")
+                toast.setAttribute("role", "alert")
+                toast.setAttribute("aria-live", "assertive")
+                toast.setAttribute("aria-atomic", "true")
+                
+                var toastHeader = document.createElement("div")
+                var toastStyle = "bg-light"
+                var headerStyle = ""
+                var buttonStyle = ""
+
+                switch(type) {
+                    case "cbt":
+                        headerStyle = "bg-dark text-light"
+                        toastStyle = "bg-dark text-light"
+                        buttonStyle = "bg-light"
+                        break
+                    case "voc":
+                        headerStyle = "bg-primary text-light"
+                        buttonStyle = "bg-light"
+                        break
+                    case "normal":
+                        headerStyle = "bg-light"
+                        break
+                }
+
+                if (winsOf(rolls,adv) == 0) {
+                    toastStyle = "bg-danger text-light"
+                }
+                if (adv) {
+                    headerStyle = "bg-warning text-dark"
+                    buttonStyle = "bg-light"
+                }
+
+                toast.className = `toast ${toastStyle} border-0`
+                toastHeader.className = `toast-header ${headerStyle}`
+                
+                var toastHeaderText = document.createElement("strong")
+                toastHeaderText.className = "me-auto"
+                toastHeaderText.innerText = `${title.toUpperCase()} ${adv? "(ADV)": ""}`
+
+                toastHeader.appendChild(toastHeaderText)
+
+                var toastHeaderButton = document.createElement("button")
+                toastHeaderButton.setAttribute("type", "button")
+                toastHeaderButton.setAttribute("data-bs-dismiss", "toast")
+                toastHeaderButton.setAttribute("aria-label", "Close")
+                toastHeaderButton.className = `btn-close ${buttonStyle}`
+
+                toastHeader.appendChild(toastHeaderButton)
+
+                toast.appendChild(toastHeader)
+                
+                var toastBody = document.createElement("div")
+                toastBody.className = "toast-body"
+
+                var toastBodyTitle = document.createElement("h5")
+                toastBodyTitle.innerText = `You rolled ${winsOf(rolls, adv)} win${winsOf(rolls, adv) == 1? "": "s"}`
+
+                toastBody.appendChild(toastBodyTitle)
+
+                var toastBodySubtitle = document.createElement("h6")
+                toastBodySubtitle.className = "fw-lighter"
+                toastBodySubtitle.innerText = `(${rolls.length}d6) Roll: ${rolls.join(", ")}`
+
+                toastBody.appendChild(toastBodySubtitle)
+
+                toast.appendChild(toastBody)
+
+                document.getElementById("toast-container").appendChild(toast)
+
+                var bsToast = new bootstrap.Toast(toast)
+                bsToast.show()
+
+            }
+
+            function rollOnClick(elem, withMod=0) {
+                var withAdvantage = document.getElementById("roll-adv").checked
+
+                if (withAdvantage) character.state.destiny--
+                if (withAdvantage) document.getElementById("roll-adv").checked = false
+
+                document.getElementById("roll-mod-0").checked = true
+
+                switch(elem.id.split("-")[0]) {
+                    case "attr": 
+                        rollDice(character.attributes[elem.id.split("-")[1]], withAdvantage, "normal", withMod)
+                        break
+                    case "skills":
+                        rollDice(character.attributes[elem.id.split("-")[1]].skills[elem.id.split("-")[2]], withAdvantage, "normal", withMod)
+                        break
+                    case "voc":
+                        if (elem.id.split("-")[2] == "skills") {
+                            rollDice(character.vocations[elem.id.split("-")[1]].skills[elem.id.split("-")[3]], withAdvantage, character.vocations[elem.id.split("-")[1]].skills[elem.id.split("-")[3]].attribute == "cbt"? "cbt": "voc", withMod)
+                        } else {
+                            rollDice(character.vocations[elem.id.split("-")[1]], withAdvantage, "voc", withMod)
+                        }
+                        break
+                }
+
+                render()
+            }
+
+            function rollDice(obj, adv, type, withMod=0) {
+                var values = []
+
+                if(obj.roll + withMod <= 0) {
+                    return
+                }
+
+                for (var i = 0; i < obj.roll + withMod; i++) {
+                    values[i] = Math.floor((Math.random() * 6) + 1)
+                }
+
+                createToast(obj.name, values, type, adv)
+            }
+
+            // REWRITE REWRITE REWRITE
+            //
+
+            var version = "1.1"
+
+            character = {attributes: {}, vocations: {}, state: {destiny: 0, commerce: 0, armour: 0, "armour-max": 0, injuries: 0}}
+
+            // Defaults
+            character.settings = {
+                limits: {
+                    attributePoints: 2,
+                    skillPoints: 12,
+                    vocationCount: 3,
+                    maxSkillPoints: 4,
+                    maxVocationPoints: 4
+                },
+                weapon: {
+
+                }
+            }
+
+            function render() {
+
+                character.version = version
+                character.name = document.getElementById("character-name").value
+                character.age = document.getElementById("character-age").value
+                character.race = document.getElementById("character-race").value
+                character.disabling = document.getElementById("character-dc").value
+
+                character.summary = {
+                    attributePoints: 0,
+                    skillPoints: 0,
+                    vocationCount: 0,
+                    maxSkillPoints: 0,
+                    maxVocationPoints: 0
+                }
+
+                character.state.notes = document.getElementById("notes").value
+
+                for (vocId in character.vocations) {
+                    var vocation = character.vocations[vocId]
+                    if (!vocation.nameEmpty) {
+                        vocation.name = document.getElementById(`voc-${vocId}-name`).value
+                        for (skillId in vocation.skills) {
+                            var skill = vocation.skills[skillId]
+                            if(!skill.nameEmpty) {
+                                skill.name = document.getElementById(`voc-${vocId}-skills-${skillId}-name`).value
+                            }
+                        }
+                    }
+                }
+
+                updateLabels()
+
+                function weaponModSettings(vocId, skillId) {
+                    /*
+                    <div class="card" id="weapon-ID-ID">
+                        <div class="card-body">
+                            <h5 class="card-title text-muted"><small>UNARMED</small></h5>
+                            <div class="row">
+                                <div class="row mb-1">
+                                    <div class="col">
+                                        Melee
+                                    </div>
+                                    <div class="col-3">
+                                        <input class="form-control" type="number" id="weapon-ID-ID-melee" value="0">
+                                    </div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col">
+                                        Ranged
+                                    </div>
+                                    <div class="col-3">
+                                        <input class="form-control" type="number" id="weapon-ID-ID-ranged" value="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    */
+
+                    var vocation = character.vocations[vocId]
+                    var skill = vocation.skills[skillId]
+
+                    var card = document.createElement("div")
+                    card.className = "card mb-2"
+                    card.id = `weapon-${vocId}-${skillId}`
+
+                    if(character.settings.weapon[skillId] == undefined) {
+                        character.settings.weapon[skillId] = {}
+                        character.settings.weapon[skillId].melee = 0
+                        character.settings.weapon[skillId].ranged = 0
+                    }
+
+                    card.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title text-muted"><small>${skill.name.toUpperCase()}</small></h5>
+                        <div class="row">
+                            <div class="row mb-1">
+                                <div class="col">
+                                    Melee
+                                </div>
+                                <div class="col-3">
+                                    <input class="form-control" type="number" id="weapon-${vocId}-${skillId}-melee" value="${character.settings.weapon[skillId].melee}">
+                                </div>
+                            </div>
+                            <div class="row mb-1">
+                                <div class="col">
+                                    Ranged
+                                </div>
+                                <div class="col-3">
+                                    <input class="form-control" type="number" id="weapon-${vocId}-${skillId}-ranged" value="${character.settings.weapon[skillId].ranged}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `
+
+                    document.getElementById("custom-weapon-modifiers").appendChild(card)
+
+                    document.getElementById(`weapon-${vocId}-${skillId}-melee`).setAttribute("onchange", `((e) => {
+                        character.settings.weapon['${skillId}'].melee = parseInt(e.value)
+                        render()
+                    })(this)`)
+
+                    document.getElementById(`weapon-${vocId}-${skillId}-ranged`).setAttribute("onchange", `((e) => {
+                        character.settings.weapon['${skillId}'].ranged = parseInt(e.value)
+                        render()
+                    })(this)`)
+
+                    console.log(character.settings.weapon)
+                    
+                }
+
+                // reset weapon mod editor
+                document.getElementById("custom-weapon-modifiers").innerHTML = ""
+                
+                // ATTRIBUTE AND SKILL POINT RENDERING
+                // Render Attribute Points
+                for (attrId in character.attributes) {
+                    var attribute = character.attributes[attrId]
+                    if (attribute.score == -1) {
+                        for (var i = 1; i <= 4; i++) document.getElementById(`attr-${attrId}-plus-${i}`).checked = false
+                        document.getElementById(`attr-${attrId}-nega-1`).checked = true
+                    } else {
+                        for (var i = 1; i <= 4; i++) document.getElementById(`attr-${attrId}-plus-${i}`).checked = i <= attribute.score
+                        document.getElementById(`attr-${attrId}-nega-1`).checked = false
+                    }
+
+                    // ATTRIBUTE ROLL
+                    var roll = 3+attribute.score+getModifier()-(document.getElementById("roll-inj").checked? character.state.injuries: 0)
+                    roll = roll >= 0? roll: 0
+                    document.getElementById(`attr-${attrId}-roll`).innerHTML = `${roll}d6`
+                    attribute.roll = roll
+
+                    character.summary.attributePoints += attribute.score > 0? attribute.score: 0
+
+                    // Render Skill Points
+                    for (skillId in attribute.skills) {
+                        var skill = attribute.skills[skillId]
+
+                        if (skill.score == -1) {
+                            for (var i = 1; i <= 4; i++) document.getElementById(`skills-${attrId}-${skillId}-plus-${i}`).checked = false
+                            document.getElementById(`skills-${attrId}-${skillId}-nega-1`).checked = true
+                        } else {
+                            for (var i = 1; i <= 4; i++) document.getElementById(`skills-${attrId}-${skillId}-plus-${i}`).checked = i <= skill.score
+                            document.getElementById(`skills-${attrId}-${skillId}-nega-1`).checked = false
+                        }
+
+                        // SKILL ROLL
+                        var roll = 3+attribute.score+skill.score+getModifier()-(document.getElementById("roll-inj").checked? character.state.injuries: 0)
+                        roll = roll >= 0? roll: 0
+                        document.getElementById(`skills-${attrId}-${skillId}-roll`).innerHTML = `${roll}d6`
+                        skill.roll = roll
+
+                        character.summary.skillPoints += skill.score
+                        character.summary.maxSkillPoints = skill.score>character.summary.maxSkillPoints? skill.score: character.summary.maxSkillPoints
+                    }
+
+                }
+
+                // VOCATION AND VOCATIONAL SKILL POINT RENDERING
+                for (vocId in character.vocations) {
+                    var vocation = character.vocations[vocId]
+
+                    for (var i = 1; i <= 4; i++) document.getElementById(`voc-${vocId}-attr-plus-${i}`).checked = i <= vocation.score
+
+                    if (!vocation.nameEmpty) {
+                        if (vocation.attribute != null) {
+                            var roll = 3+character.attributes[vocation.attribute].score+vocation.score+getModifier()-(document.getElementById("roll-inj").checked? character.state.injuries: 0)
+                            roll = roll >= 0? roll: 0
+
+                            document.getElementById(`voc-${vocId}-roll-container`).childNodes[2].remove()
+
+                            var button = document.createElement("button")
+                            button.className = "btn btn-outline-secondary mb-2 no-hover"
+                            button.setAttribute("type", "button")
+                            button.setAttribute("onclick", "rollOnClick(this)")
+                            button.id = `voc-${vocId}-roll`
+                            button.innerHTML = `${roll}d6`
+
+                            document.getElementById(`voc-${vocId}-roll-container`).appendChild(button)
+                            
+                            vocation.roll = roll
+
+                            character.summary.skillPoints += vocation.score
+                        }
+                        character.summary.vocationCount++
+                    }
+                    
+
+                    for(skillId in vocation.skills) {
+                        var skill = vocation.skills[skillId]
+
+                        for (var i = 1; i <= 4; i++) document.getElementById(`voc-${vocId}-skills-${skillId}-plus-${i}`).checked = i <= skill.score
+
+                        if (skill.attribute != null) {
+                            var roll
+                            if (skill.attribute != "cbt") {
+                                roll = 3+character.attributes[skill.attribute].score+skill.score+getModifier()-(document.getElementById("roll-inj").checked? character.state.injuries: 0)
+                                delete skill.combat
+                            } else {
+                                var attSum = 0
+                                for (attribute in character.attributes) attSum += character.attributes[attribute].score
+
+                                var armourDeficit = character.state["armour-max"] - 1 < 0? 0: character.state["armour-max"] - 1
+                                var enduranceBenefit = character.attributes.str.skills[0].score < 0? 0: character.attributes.str.skills[0].score
+                                var armourPenalty = armourDeficit - enduranceBenefit
+                                armourPenalty = armourPenalty < 0? 0: armourPenalty
+                                
+                                roll = 3+attSum+skill.score+getModifier()-armourPenalty-(document.getElementById("roll-inj").checked? character.state.injuries: 0)
+
+                                weaponModSettings(vocId, skillId)
+
+                                skill.combat = {melee: roll + character.settings.weapon[skillId].melee, ranged: roll + character.settings.weapon[skillId].ranged}
+                                skill.combat.melee = skill.combat.melee < 0? 0: skill.combat.melee
+                                skill.combat.ranged = skill.combat.melee < 0? 0: skill.combat.ranged
+                            }
+                            roll = roll >= 0? roll: 0
+
+                            if(document.getElementById(`voc-${vocId}-skills-${skillId}-roll`)) {
+                                document.getElementById(`voc-${vocId}-skills-${skillId}-roll`).remove()
+                            }
+                            if (document.getElementById(`voc-${vocId}-skills-${skillId}-roll-melee`)) {
+                                document.getElementById(`voc-${vocId}-skills-${skillId}-roll-melee`).remove()
+                            }
+                            if (document.getElementById(`voc-${vocId}-skills-${skillId}-roll-ranged`)) {
+                                document.getElementById(`voc-${vocId}-skills-${skillId}-roll-ranged`).remove()
+                            }
+
+                            var button = document.createElement("button")
+                            button.className = "btn btn-outline-secondary btn-sm no-hover"
+                            button.setAttribute("type", "button")
+                            button.setAttribute("onclick", "rollOnClick(this)")
+                            button.id = `voc-${vocId}-skills-${skillId}-roll`
+                            button.innerHTML = `${roll}d6`
+                            
+                            if(skill.combat) {
+                                
+                                var buttonMelee = document.createElement("button")
+                                buttonMelee.className = `btn ${skill.combat.melee < skill.roll? "btn-outline-danger": "btn-outline-success"} btn-sm no-hover`
+                                buttonMelee.setAttribute("type", "button")
+                                buttonMelee.setAttribute("onclick", `rollOnClick(this, ${character.settings.weapon[skillId].melee})`)
+                                buttonMelee.id = `voc-${vocId}-skills-${skillId}-roll-melee`
+                                buttonMelee.innerHTML = `${skill.combat.melee}d6`
+
+                                var buttonRanged = document.createElement("button")
+                                buttonRanged.className = `btn ${skill.combat.ranged < skill.roll? "btn-outline-danger": "btn-outline-success"} btn-sm no-hover`
+                                buttonRanged.setAttribute("type", "button")
+                                buttonRanged.setAttribute("onclick", `rollOnClick(this, ${character.settings.weapon[skillId].ranged})`)
+                                buttonRanged.id = `voc-${vocId}-skills-${skillId}-roll-ranged`
+                                buttonRanged.innerHTML = `${skill.combat.ranged}d6`
+
+                                if(character.settings.weapon[skillId].ranged != 0) {
+                                    if (character.settings.weapon[skillId].melee != 0) {
+                                        document.getElementById(`voc-${vocId}-skills-${skillId}-roll-container`).appendChild(buttonMelee)
+                                    }
+                                    document.getElementById(`voc-${vocId}-skills-${skillId}-roll-container`).appendChild(button)
+                                    document.getElementById(`voc-${vocId}-skills-${skillId}-roll-container`).appendChild(buttonRanged)
+                                } else {
+                                    document.getElementById(`voc-${vocId}-skills-${skillId}-roll-container`).appendChild(button)
+                                    if (character.settings.weapon[skillId].melee != 0) {
+                                        document.getElementById(`voc-${vocId}-skills-${skillId}-roll-container`).appendChild(buttonMelee)
+                                    }
+                                }
+
+                            } else {
+                                document.getElementById(`voc-${vocId}-skills-${skillId}-roll-container`).appendChild(button)
+                            }
+                            
+                            skill.roll = roll
+
+                            character.summary.skillPoints += skill.score
+                            character.summary.maxVocationPoints = skill.score>character.summary.maxVocationPoints? skill.score: character.summary.maxVocationPoints
+                        }
+                    }
+                }
+
+                // STATE COUNTERS
+                for(var otherId in character.state) {
+                    var counter = character.state[otherId]
+
+                    for (var i = 1; i <= counterLookup[otherId.split("-")[0]]; i++) document.getElementById(`${otherId}-${i}`).checked = i <= counter
+                }
+
+                // SUMMARY
+
+                document.getElementById("limit-attr-points").innerText = character.settings.limits.attributePoints
+                document.getElementById("limit-skill-points").innerText = character.settings.limits.skillPoints + character.attributes.int.score*3
+                document.getElementById("limit-voc-count").innerText = character.settings.limits.vocationCount
+
+                document.getElementById("limit-max-skill-points").innerText = character.settings.limits.maxSkillPoints
+                document.getElementById("limit-max-voc-points").innerText = character.settings.limits.maxVocationPoints
+
+                document.getElementById("input-attr-points").value = character.settings.limits.attributePoints
+                document.getElementById("input-skill-points").value = character.settings.limits.skillPoints
+                document.getElementById("input-voc-count").value = character.settings.limits.vocationCount
+
+                document.getElementById("input-max-skill-points").value = character.settings.limits.maxSkillPoints
+                document.getElementById("input-max-voc-points").value = character.settings.limits.maxVocationPoints
+
+                if (character.summary.vocationCount >= 1) {
+                    character.summary.skillPoints -= 1
+                }
+
+                document.getElementById("sum-attr-points").innerText = character.summary.attributePoints
+                if (character.summary.attributePoints > character.settings.limits.attributePoints) {
+                    document.getElementById("sum-attr-points").classList.add("text-danger")
+                } else {
+                    document.getElementById("sum-attr-points").classList.remove("text-danger")
+                }
+                document.getElementById("sum-skill-points").innerText = character.summary.skillPoints
+                if (character.summary.skillPoints > character.settings.limits.skillPoints  + character.attributes.int.score*3) {
+                    document.getElementById("sum-skill-points").classList.add("text-danger")
+                } else {
+                    document.getElementById("sum-skill-points").classList.remove("text-danger")
+                }
+                document.getElementById("sum-voc-count").innerText = character.summary.vocationCount
+                if (character.summary.vocationCount > character.settings.limits.vocationCount) {
+                    document.getElementById("sum-voc-count").classList.add("text-danger")
+                } else {
+                    document.getElementById("sum-voc-count").classList.remove("text-danger")
+                }
+
+                document.getElementById("sum-max-skill-points").innerText = character.summary.maxSkillPoints
+                if (character.summary.maxSkillPoints > character.settings.limits.maxSkillPoints) {
+                    document.getElementById("sum-max-skill-points").classList.add("text-danger")
+                } else {
+                    document.getElementById("sum-max-skill-points").classList.remove("text-danger")
+                }
+                document.getElementById("sum-max-voc-points").innerText = character.summary.maxVocationPoints
+                if (character.summary.maxVocationPoints > character.settings.limits.maxVocationPoints) {
+                    document.getElementById("sum-max-voc-points").classList.add("text-danger")
+                } else {
+                    document.getElementById("sum-max-voc-points").classList.remove("text-danger")
+                }
+
+                validate()
+            }
+
+            function validate() {
+                var dirty = false
+
+                var usedNegativePoint = false
+                for (attrId in character.attributes) for (skillId in character.attributes[attrId].skills) if (character.attributes[attrId].skills[skillId].score == -1 ) usedNegativePoint = true
+
+                // ATTRIBUTE AND SKILL POINT VALIDATION
+                for (attrId in character.attributes) {
+                    var attribute = character.attributes[attrId]
+
+                    // ATTRIBUTE POINT CHECK
+                    for (var i = 1; i <= 4; i++) {
+                        var diff = i - attribute.score
+
+                        if (character.summary.attributePoints + diff > character.settings.limits.attributePoints) {
+                            document.getElementById(`attr-${attrId}-plus-${i}`).label.classList.add("disabled")
+                        } else {
+                            document.getElementById(`attr-${attrId}-plus-${i}`).label.classList.remove("disabled")
+                        }
+                    }
+
+                    for (skillId in attribute.skills) {
+                        var skill = attribute.skills[skillId]
+
+                        if (!document.getElementById(`skills-${attrId}-${skillId}-nega-1`).checked) {
+                            if (usedNegativePoint) {
+                                document.getElementById(`skills-${attrId}-${skillId}-nega-1`).label.classList.add("disabled")
+                            } else {
+                                document.getElementById(`skills-${attrId}-${skillId}-nega-1`).label.classList.remove("disabled")
+                            }
+                        }
+
+                        // SKILL POINT CHECK
+                        for (var i = 1; i <= 4; i++) {
+                            var diff = i - skill.score
+
+                            if (!document.getElementById(`skills-${attrId}-${skillId}-plus-${i}`).checked && (character.summary.skillPoints + diff > character.settings.limits.skillPoints + character.attributes.int.score*3 || i > character.settings.limits.maxSkillPoints)) {
+                                document.getElementById(`skills-${attrId}-${skillId}-plus-${i}`).label.classList.add("disabled")
+                            } else {
+                                document.getElementById(`skills-${attrId}-${skillId}-plus-${i}`).label.classList.remove("disabled")
+                            }
+                        }
+                    }
+                }
+
+                // VOCATION AND VOCATIONAL SKILL POINT VALIDATION
+                for (vocId in character.vocations) {
+                    var vocation = character.vocations[vocId]
+
+                    for(skillId in vocation.skills) {
+                        var skill = vocation.skills[skillId]
+
+                        // Cannot put in a vocational skill attribute or vocational skill score if vocational skill has no name
+                        if (skill.nameEmpty) {
+                            Object.keys(character.attributes).concat("cbt").forEach((e) => {document.getElementById(`voc-${vocId}-skills-${skillId}-attr-${e}`).label.classList.add("disabled")})
+                        } else {
+                            Object.keys(character.attributes).concat("cbt").forEach((e) => {document.getElementById(`voc-${vocId}-skills-${skillId}-attr-${e}`).label.classList.remove("disabled")})
+                        }
+
+                        // Cannot put in a vocational skill if vocation has no name or has no attribute
+                        if (vocation.nameEmpty || vocation.attribute == null) {
+                            document.getElementById(`voc-${vocId}-skills-${skillId}-name`).setAttribute("disabled", "")
+                        } else {
+                            document.getElementById(`voc-${vocId}-skills-${skillId}-name`).removeAttribute("disabled")
+                        }
+
+                        // Cannot input a vocational skill score if vocational skill attribute hasn't been selected
+                        if(skill.attribute == null) {
+                            for (var i = 1; i <= 4; i++) document.getElementById(`voc-${vocId}-skills-${skillId}-plus-${i}`).label.classList.add("disabled")
+                        } else {
+                            for (var i = 1; i <= 4; i++) document.getElementById(`voc-${vocId}-skills-${skillId}-plus-${i}`).label.classList.remove("disabled")
+                        }
+
+                        // Vocational skill score always lower than vocation score
+                        for (var i = 1; i <= 4; i++) {
+                            if (i > vocation.score) {
+                                document.getElementById(`voc-${vocId}-skills-${skillId}-plus-${i}`).label.classList.add("disabled")
+                            }
+                        }
+
+                        // Vocational skill cannot have a score of 0
+                        if (!skill.nameEmpty && skill.attribute != null) {
+                            if (skill.score == 0) {
+                                skill.score++
+                                dirty = true
+                            }
+                            document.getElementById(`voc-${vocId}-skills-${skillId}-plus-1`).label.classList.add("disabled")
+                        }
+
+                        // VOCATIONAL SKILL POINT CHECK
+                        for (var i = 2; i <= 4; i++) {
+                            var diff = i - skill.score
+                            if (!document.getElementById(`voc-${vocId}-skills-${skillId}-plus-${i}`).checked && (character.summary.skillPoints + diff > character.settings.limits.skillPoints + character.attributes.int.score*3  || i > character.settings.limits.maxVocationPoints)) {
+                                document.getElementById(`voc-${vocId}-skills-${skillId}-plus-${i}`).label.classList.add("disabled")
+                            }
+                        }
+                        
+                        if (skill.nameEmpty && (character.summary.skillPoints + 1 > character.settings.limits.skillPoints + character.attributes.int.score*3)) {
+                            document.getElementById(`voc-${vocId}-skills-${skillId}`).classList.add("d-none")
+                        } else {
+                            document.getElementById(`voc-${vocId}-skills-${skillId}`).classList.remove("d-none")
+                        }
+                        
+                    }
+
+                    // Cannot put in a vocation attribute or vocational score if vocation has no name
+                    if (vocation.nameEmpty) {
+                        for(var attrId in character.attributes) document.getElementById(`voc-${vocId}-attr-${attrId}`).label.classList.add("disabled")
+                    } else {
+                        for(var attrId in character.attributes) document.getElementById(`voc-${vocId}-attr-${attrId}`).label.classList.remove("disabled")
+                    }
+
+                    // Cannot input a vocation score if vocation attribute hasn't been selected
+                    if (vocation.attribute == null) {
+                        for (var i = 1; i <= 4; i++) document.getElementById(`voc-${vocId}-attr-plus-${i}`).label.classList.add("disabled")
+                    } else {
+                        for (var i = 1; i <= 4; i++) document.getElementById(`voc-${vocId}-attr-plus-${i}`).label.classList.remove("disabled")
+                    }
+
+                    // Vocation cannot have a score of 0
+                    if (!vocation.nameEmpty && vocation.attribute != null) {
+                        if (vocation.score == 0) {
+                            vocation.score++
+                            dirty = true
+                        }
+                        document.getElementById(`voc-${vocId}-attr-plus-1`).label.classList.add("disabled")
+                    }
+
+                    // VOCATION POINT CHECK
+                    for (var i = 2; i <= 4; i++) {
+                        var diff = i - vocation.score
+                        if (!document.getElementById(`voc-${vocId}-attr-plus-${i}`).checked && (character.summary.skillPoints + diff > character.settings.limits.skillPoints + character.attributes.int.score*3)) {
+                            document.getElementById(`voc-${vocId}-attr-plus-${i}`).label.classList.add("disabled")
+                        }
+                    }
+
+                    if(vocation.nameEmpty && (character.summary.skillPoints + 1 > character.settings.limits.skillPoints + character.attributes.int.score*3 || character.summary.vocationCount + 1 > character.settings.limits.vocationCount)) {
+                        document.getElementById(`voc-${vocId}`).classList.add("d-none")
+                    } else {
+                        document.getElementById(`voc-${vocId}`).classList.remove("d-none")
+                    }
+                }
+
+                // VALIDATE MAX STATE
+                for (var otherId in character.state) {
+                    if(otherId.split("-")[1] != undefined && otherId.split("-")[1] == "max") {
+                        var subprefix = otherId.split("-")[0]
+                        var stateMax = character.state[otherId]
+                        var state = character.state[subprefix]
+
+                        for (var i = 1; i <= counterLookup[subprefix]; i++) {
+                            if (i > stateMax) {
+                                document.getElementById(`${subprefix}-${i}`).label.classList.add("disabled")
+                                if(document.getElementById(`${subprefix}-${i}`).checked){
+                                    character.state[subprefix]--
+                                    dirty = true
+                                }
+                            } else {
+                                document.getElementById(`${subprefix}-${i}`).label.classList.remove("disabled")
+                            }
+                        }
+                    }
+                }
+
+                // DESTINY: Adv is off is destiny is 0
+                if (character.state.destiny == undefined || character.state.destiny == 0) {
+                    document.getElementById("roll-adv").label.classList.add("disabled")
+                } else {
+                    document.getElementById("roll-adv").label.classList.remove("disabled")
+                }
+
+                // ARMOUR: Armour reset is disabled when armour = max armour
+                if (character.state.armour == character.state["armour-max"]) {
+                    document.getElementById("armour-reset").label.classList.add("disabled")
+                } else {
+                    document.getElementById("armour-reset").label.classList.remove("disabled")
+                }
+
+                if (dirty) render()
+            }
+
+            //
+            // REWRITE REWRITE REWRITE
+
+            // The Next Generation
+
+            var template = [
+                {
+                    id: "str",
+                    name: "Strength",
+                    info: "For each additional point in <strong>STR</strong>, <strong>severity in injury</strong> can be <strong>reduced</strong> once every combat encounter.",
+                    skills: [
+                        "Endurance",
+                        "Athletics",
+                        "Grip",
+                        "Swim",
+                        "Throw"
+                    ]
+                },
+                {
+                    id: "ref",
+                    name: "Reflex",
+                    info: "For each additional point in <strong>REF</strong>, <strong>Turn Priority is Higher</strong> at the beginning of combat encounters.",
+                    skills: [
+                        "Perception",
+                        "Acrobatics",
+                        "Ride/Pilot",
+                        "Sleight of Hand",
+                        "Stealth"
+                    ]
+                },
+                {
+                    id: "int",
+                    name: "Intelligence",
+                    info: "For each additional point in <strong>INT</strong>, Receive <strong>3 additional Skill Points</strong> to spend in character creation.",
+                    skills: [
+                        "General Knowledge",
+                        "Deception",
+                        "Infiltration",
+                        "Persuasion",
+                        "Survival"
+                    ]
+                }
+
+            ]
+
+            for (attribute in template) {
+                addAttribute(template[attribute].name, template[attribute].id, template[attribute].info)
+                character.attributes[template[attribute].id] = {name: template[attribute].name, score: 0, skills: []}
+                addSkills(template[attribute].name, template[attribute].id, template[attribute].skills)
+                for(skillId in template[attribute].skills) {
+                    character.attributes[template[attribute].id].skills[skillId] = {name: template[attribute].skills[skillId], score: 0}
+                }
+            }
+
+            addVocation()
+            render()
+
+            // IMPORT AND EXPORT
+
+            
+
+            function importFile() {
+
+                function getSkillIdByName(name) {
+                    for (attribute in attributes) {
+                        for (_skill in attributes[attribute].skills) {
+                            if (name === attributes[attribute].skills[_skill].name) {
+                                return _skill
+                            }
+                        }
+                    }
+                }
+
+                var fileNode = document.getElementById("formFile")
+                var file = fileNode.files[0]
+
+                if (file === undefined) {return}
+
+                file.text().then(text => {
+                    var importChar = JSON.parse(text)
+                    if (importChar.version != version) {
+                        return
+                    }
+
+                    // Character Info
+                    document.getElementById("character-name").value = importChar.name
+                    document.getElementById("character-age").value = importChar.age
+                    document.getElementById("character-race").value = importChar.race
+                    document.getElementById("character-dc").value = importChar.disabling
+                    document.getElementById("notes").value = character.state.notes
+
+                    character.state.destiny = importChar.state.destiny
+                    character.state.commerce = importChar.state.commerce
+                    character.state.injuries = importChar.state.injuries
+                    character.state.armour = importChar.state.armour
+                    character.state["armour-max"] = importChar.state.armourMax
+
+                    if (importChar.settings) {
+                        character.settings.limits = importChar.settings.limits
+                    }
+
+                    // Attributes and Skills
+                    for (i in template) {
+                        character.attributes[template[i].id].score = importChar[template[i].name.toLowerCase()].score
+
+                        for (j in template[i].skills) {
+                            character.attributes[template[i].id].skills[j].score = importChar[template[i].name.toLowerCase()].skills[template[i].skills[j]]
+                        }
+                    }
+
+                    // Vocations
+                    var vp = document.getElementById("vocations").parentElement
+                    document.getElementById("vocations").remove()
+                    var nD = document.createElement("div")
+                    nD.id = "vocations"
+                    vp.appendChild(nD)
+
+                    delete character.vocations
+                    character.vocations = {}
+
+
+                    for (vocation in importChar.vocations) {
+                        var id = addVocation(null, false)
+                        character.vocations[id].nameEmpty = false
+                        document.getElementById(`voc-${id}-name`).value = vocation
+                        document.getElementById(`voc-${id}-attr-${importChar.vocations[vocation].attribute}`).checked = true
+
+                        character.vocations[id].attribute = importChar.vocations[vocation].attribute
+
+                        character.vocations[id].score = importChar.vocations[vocation].score
+
+                        for (skill in importChar.vocations[vocation].skills) {
+                            var sid = addVocationalSkill(id)
+                            character.vocations[id].skills[sid].nameEmpty = false
+                            
+                            document.getElementById(`voc-${id}-skills-${sid}-name`).value = skill
+                            document.getElementById(`voc-${id}-skills-${sid}-attr-${importChar.vocations[vocation].skills[skill].attribute}`).checked = true
+
+                            character.vocations[id].skills[sid].attribute = importChar.vocations[vocation].skills[skill].attribute
+
+                            character.vocations[id].skills[sid].score = importChar.vocations[vocation].skills[skill].score
+
+                            if(importChar.vocations[vocation].skills[skill].combat) {
+                                character.settings.weapon[sid] = {
+                                    melee: importChar.vocations[vocation].skills[skill].combat.melee,
+                                    ranged: importChar.vocations[vocation].skills[skill].combat.ranged
+                                }
+                            }
+
+                        }
+
+                        if(Object.keys(character.vocations[id].skills).length < 4) {
+                            addVocationalSkill(id)
+                        }
+                    }
+
+                    if (Object.keys(character.vocations).length < 3) {
+                        addVocation()
+                    }
+
+                    console.log(character)
+                    render()
+                })
+            }
+
+            function exportFile() {
+                function downloadObjectAsJson(exportObj, exportName) {
+                    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+                    var downloadAnchorNode = document.createElement('a');
+                    downloadAnchorNode.setAttribute("href",     dataStr);
+                    downloadAnchorNode.setAttribute("download", exportName + ".json");
+                    document.body.appendChild(downloadAnchorNode); // required for firefox
+                    downloadAnchorNode.click();
+                    downloadAnchorNode.remove();
+                }
+
+                render()
+
+                var exportChar = {
+                    version: version,
+                    name: character.name,
+                    age: character.age,
+                    race: character.race,
+                    disabling: character.disabling,
+                    vocations: {},
+                    state: {
+                        notes: character.state.notes? character.state.notes: "",
+                        destiny: character.state.destiny? character.state.destiny: 0,
+                        commerce: character.state.commerce? character.state.commerce: 0,
+                        injuries: character.state.injuries? character.state.injuries: 0,
+                        armour: character.state.armour? character.state.armour: 0,
+                        armourMax: character.state["armour-max"]? character.state["armour-max"]: 0
+                    },
+                    settings: {
+                        limits: character.settings.limits
+                    }
+                }
+                
+                for (attrId in character.attributes) {
+                    var attribute = character.attributes[attrId]
+                    var attrName
+                    var templateNo
+                    for (var i = 0; i < template.length; i++) if (template[i].id == attrId) {
+                        templateNo = i
+                        attrName = template[i].name.toLowerCase()
+                    }
+
+                    exportChar[attrName] = {score: character.attributes[attrId].score, skills: {}}
+
+                    for (skillId in attribute.skills) {
+                        var skill = attribute.skills[skillId]
+                        exportChar[attrName].skills[skill.name] = skill.score
+                    }
+                }
+
+                for (vocId in character.vocations) {
+                    var vocation = character.vocations[vocId]
+                    if (! vocation.nameEmpty && vocation.attribute != null) {
+                        exportChar.vocations[vocation.name] = {
+                            score: vocation.score,
+                            attribute: vocation.attribute,
+                            skills: {}
+                        }
+
+                        for (skillId in vocation.skills) {
+                            var skill = vocation.skills[skillId]
+                            if (!skill.nameEmpty && skill.attribute != null) {
+                                exportChar.vocations[vocation.name].skills[skill.name] = {
+                                    score: skill.score,
+                                    attribute: skill.attribute
+                                }
+                                if(character.settings.weapon[skillId]) {
+                                    exportChar.vocations[vocation.name].skills[skill.name].combat = {
+                                        melee: character.settings.weapon[skillId].melee,
+                                        ranged: character.settings.weapon[skillId].ranged
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                downloadObjectAsJson(exportChar, exportChar.name != ""? exportChar.name : "character")
+            }
+
+        </script>
+
+    </body>
+</html>
